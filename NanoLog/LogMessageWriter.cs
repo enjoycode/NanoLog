@@ -7,8 +7,10 @@ namespace NanoLog;
 
 internal unsafe ref struct LogMessageWriter
 {
-    public LogMessageWriter() {}
-    
+    public LogMessageWriter()
+    {
+    }
+
     private int _pos;
     private LogMessage _msg;
 
@@ -19,16 +21,20 @@ internal unsafe ref struct LogMessageWriter
     /// </summary>
     private bool UseExt => _msg.ExtData != null;
 
-    /// <summary>
-    /// 当前缓存块剩余的可写入字节数
-    /// </summary>
-    private int Available => !UseExt ? LogMessage.InnerDataSize - _pos : _msg.ExtData!.Length - _pos;
+    #region ====Write Data====
 
     private Span<byte> WriteSpan => !UseExt
         ? MemoryMarshal.CreateSpan(ref _msg.DataPtr, LogMessage.InnerDataSize)
         : _msg.ExtData!.AsSpan();
 
-    #region ====Write Data====
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EnsureAvailable(int required)
+    {
+        var available = !UseExt ? LogMessage.InnerDataSize - _pos : _msg.ExtData!.Length - _pos;
+        if (available >= required)
+            return;
+        Grow(required);
+    }
 
     private void Grow(int required)
     {
@@ -49,51 +55,37 @@ internal unsafe ref struct LogMessageWriter
 
     private void Write(ReadOnlySpan<byte> src)
     {
-        var available = Available;
-        if (available >= src.Length)
-        {
-            src.CopyTo(WriteSpan[_pos..]);
-            _pos += src.Length;
-        }
-        else
-        {
-            if (available > 0)
-                src[..available].CopyTo(WriteSpan[_pos..]);
-            Grow(src.Length - available);
-            src[available..].CopyTo(WriteSpan[_pos..]);
-            _pos += src.Length - available;
-        }
+        EnsureAvailable(src.Length);
+        src.CopyTo(WriteSpan[_pos..]);
+        _pos += src.Length;
     }
 
     private void WriteByte(byte v)
     {
-        if (Available >= 1)
-        {
-            WriteSpan[_pos++] = v;
-        }
-        else
-        {
-            Grow(1);
-            WriteSpan[_pos++] = v;
-        }
+        EnsureAvailable(1);
+        WriteSpan[_pos++] = v;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void WriteUShortValue(ushort v)
     {
+        EnsureAvailable(2);
         var ptr = (byte*)&v;
-        WriteByte(ptr[0]);
-        WriteByte(ptr[1]);
+        var dest = WriteSpan;
+        dest[0] = ptr[0];
+        dest[1] = ptr[1];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void WriteUIntValue(uint v)
     {
+        EnsureAvailable(4);
         var ptr = (byte*)&v;
-        WriteByte(ptr[0]);
-        WriteByte(ptr[1]);
-        WriteByte(ptr[2]);
-        WriteByte(ptr[3]);
+        var dest = WriteSpan;
+        dest[0] = ptr[0];
+        dest[1] = ptr[1];
+        dest[2] = ptr[2];
+        dest[3] = ptr[3];
     }
 
     /// <summary>
