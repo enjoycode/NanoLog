@@ -5,55 +5,110 @@ namespace NanoLog;
 
 public abstract unsafe class LogMessageVisitor
 {
-    public void Visit(ref readonly LogMessage message)
-    {
-        var pos = 0;
-        var src = MemoryMarshal.CreateReadOnlySpan(ref message.DataPtr, LogMessage.InnerDataSize);
-        while (pos < src.Length)
-        {
-            var tokenType = (TokenType)src[pos++];
-            if (tokenType == TokenType.End)
-                break;
+    private byte* _innerDataPtr;
+    private byte[]? _extData;
+    private int _pos;
+    private bool _useExt;
 
-            switch (tokenType)
-            {
-                case TokenType.Literal1:
-                {
-                    EnsureAvailable(1, ref pos, ref src, message.ExtData);
-                    var len = src[pos++] * 2;
-                    EnsureAvailable(len, ref pos, ref src, message.ExtData);
-                    VisitLiteral(MemoryMarshal.Cast<byte, char>(src.Slice(pos, len)));
-                    pos += len;
-                    break;
-                }
-                case TokenType.DateTime:
-                {
-                    EnsureAvailable(1, ref pos, ref src, message.ExtData);
-                    var len = src[pos++] * 2;
-                    
-                    
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-    }
+    #region =====Read Data====
 
-    private static void EnsureAvailable(int required, ref int pos, ref ReadOnlySpan<byte> buf, byte[]? extData)
+    private ReadOnlySpan<byte> ReadSpan =>
+        _useExt ? _extData.AsSpan() : new ReadOnlySpan<byte>(_innerDataPtr, LogMessage.InnerDataSize);
+
+    private void EnsureAvailable(int required)
     {
-        var isExt = extData != null &&
-                    Unsafe.AsPointer(ref MemoryMarshal.GetReference(buf)) ==
-                    Unsafe.AsPointer(ref MemoryMarshal.GetReference(extData.AsSpan()));
-        var available = !isExt ? LogMessage.InnerDataSize - pos : extData!.Length - pos;
+        var available = !_useExt ? LogMessage.InnerDataSize - _pos : _extData!.Length - _pos;
         if (available >= required)
             return;
 
-        if (isExt || extData == null)
+        if (_useExt || _extData == null)
             throw new IndexOutOfRangeException();
 
-        pos = 0;
-        buf = extData.AsSpan();
+        _useExt = true;
+        _pos = 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ReadOnlySpan<byte> Read(int bytesCount)
+    {
+        EnsureAvailable(bytesCount);
+        var res = ReadSpan.Slice(_pos, bytesCount);
+        _pos += bytesCount;
+        return res;
+    }
+
+    private void ReadTo(Span<byte> dest)
+    {
+        EnsureAvailable(dest.Length);
+        ReadSpan.Slice(_pos, dest.Length).CopyTo(dest);
+        _pos += dest.Length;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private byte ReadByte()
+    {
+        EnsureAvailable(1);
+        return ReadSpan[_pos++];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ReadOnlySpan<char> ReadChars(int charsCount) =>
+        MemoryMarshal.Cast<byte, char>(Read(charsCount * 2));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ReadOnlySpan<char> ReadShortString()
+    {
+        var charsCount = (int)ReadByte();
+        return charsCount <= 0 ? ReadOnlySpan<char>.Empty : ReadChars(charsCount);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private long ReadLong()
+    {
+        var res = 0L;
+        ReadTo(new Span<byte>(&res, 8));
+        return res;
+    }
+
+    /// <summary>
+    /// Read DateTime(UTC) value
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private DateTime ReadDateTime()
+    {
+        var ticks = ReadLong();
+        return new DateTime(ticks, DateTimeKind.Utc);
+    }
+
+    #endregion
+
+    public void Visit(ref readonly LogMessage message)
+    {
+        _pos = 0;
+        _useExt = false;
+        _innerDataPtr = (byte*)Unsafe.AsPointer(ref message.DataPtr);
+        _extData = message.ExtData;
+
+        while (true)
+        {
+            if (!_useExt && _pos == LogMessage.InnerDataSize && _extData == null)
+                break;
+
+            var tokenType = (TokenType)ReadByte();
+            switch (tokenType)
+            {
+                case TokenType.Literal1:
+                    VisitLiteral(ReadChars(ReadByte()));
+                    break;
+                case TokenType.DateTime:
+                    VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
+                    break;
+                case TokenType.End:
+                    return;
+                default:
+                    return;
+            }
+        }
     }
 
     protected abstract void VisitLiteral(ReadOnlySpan<char> chars);

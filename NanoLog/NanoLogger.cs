@@ -44,6 +44,8 @@ public sealed class NanoLogger
     public void Debug([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<DebugLevel> builder)
     {
         if (!builder.IsEnabled) return;
+        
+        builder.FinishWrite();
         var logEvent = new LogEvent(LogLevel.Debug, "", "", 0);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }

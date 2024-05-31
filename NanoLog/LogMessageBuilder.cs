@@ -31,6 +31,9 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
     {
         _writer.AppendDateTime(name, value, format);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void FinishWrite() => _writer.FinishWrite();
 }
 
 public interface ILogLevelHandler

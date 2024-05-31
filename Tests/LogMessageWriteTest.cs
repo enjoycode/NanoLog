@@ -20,4 +20,17 @@ public class LogMessageWriteTest
         var charSpan = MemoryMarshal.Cast<byte, char>(span[2..]) ;
         Assert.IsTrue(literal.AsSpan().SequenceEqual(charSpan));
     }
+
+    [TestMethod]
+    public void TestVisitor()
+    {
+        var writer = new LogMessageWriter();
+        writer.AppendLiteral("Hello");
+        writer.AppendDateTime("Now", DateTime.Now, "yyyy-MM-dd hh:mm:ss.fff");
+        writer.AppendLiteral("中国");
+        writer.FinishWrite();
+
+        var dump = new LogMessageDump();
+        dump.Visit(ref writer.Message);
+    }
 }
