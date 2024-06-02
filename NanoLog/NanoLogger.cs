@@ -41,12 +41,13 @@ public sealed class NanoLogger
         return true;
     }
 
-    public void Debug([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<DebugLevel> builder)
+    public void Debug([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<DebugLevel> builder,
+        [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
     {
         if (!builder.IsEnabled) return;
-        
+
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Debug, "", "", 0);
+        var logEvent = new LogEvent(LogLevel.Debug, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 }
