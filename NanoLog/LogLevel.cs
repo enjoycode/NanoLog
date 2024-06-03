@@ -38,7 +38,7 @@ public enum LogLevel : byte
     /// Logs that describe an unrecoverable application or system crash, or a catastrophic failure that requires
     /// immediate attention.
     /// </summary>
-    Critical = 5,
+    Fatal = 5,
 
     /// <summary>
     /// Not used for writing log messages. Specifies that a logging category should not write any messages.

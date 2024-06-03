@@ -28,11 +28,11 @@ public sealed class NanoLogger
 
     #endregion
 
-    private readonly string? _categoryName;
+    private readonly string _categoryName;
 
     public NanoLogger(string? categoryName = null)
     {
-        _categoryName = categoryName;
+        _categoryName = categoryName ?? "";
     }
 
     public bool IsEnabled(LogLevel logLevel)
@@ -41,13 +41,69 @@ public sealed class NanoLogger
         return true;
     }
 
+    #region ====Log Methods====
+
+    public void Trace(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
+        [CallerLineNumber] int line = 0)
+    {
+        if (!IsEnabled(LogLevel.Trace)) return;
+
+        var builder = new LogMessageBuilder<TraceLevel>();
+        builder.AppendLiteral(message);
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Trace, _categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
+    public void Trace([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<TraceLevel> builder,
+        [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
+    {
+        if (!builder.IsEnabled) return;
+
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Trace, _categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
     public void Debug([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<DebugLevel> builder,
         [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
     {
         if (!builder.IsEnabled) return;
 
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Debug, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Debug, _categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
+
+    public void Info([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<InfoLevel> builder,
+        [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
+    {
+        if (!builder.IsEnabled) return;
+
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Information, _categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
+    public void Warn([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<WarnLevel> builder,
+        [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
+    {
+        if (!builder.IsEnabled) return;
+
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Warning, _categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
+    public void Error([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<ErrorLevel> builder,
+        [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
+    {
+        if (!builder.IsEnabled) return;
+
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Error, _categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
+    #endregion
 }

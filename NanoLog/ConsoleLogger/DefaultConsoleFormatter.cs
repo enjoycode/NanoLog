@@ -12,6 +12,7 @@ public sealed class DefaultConsoleFormatter : ConsoleFormatter
     private static readonly byte[] Green = [0x1B, 0x5B, 0x33, 0x32, 0x6D];
     private static readonly byte[] Yellow = [0x1B, 0x5B, 0x33, 0x33, 0x6D];
     private static readonly byte[] Blue = [0x1B, 0x5B, 0x33, 0x34, 0x6D];
+    private static readonly byte[] Cyan = [0x1B, 0x5B, 0x33, 0x36, 0x6D];
     private static readonly byte[] Magenta = [0x1B, 0x5B, 0x33, 0x35, 0x6D];
     private static readonly byte[] Reset = [0x1B, 0x5B, 0x30, 0x6D];
 
@@ -22,18 +23,18 @@ public sealed class DefaultConsoleFormatter : ConsoleFormatter
         LogLevel.Information => 'I',
         LogLevel.Warning => 'W',
         LogLevel.Error => 'E',
-        LogLevel.Critical => 'F',
+        LogLevel.Fatal => 'F',
         _ => 'U',
     };
 
     private static byte[] GetLevelColor(LogLevel level) => level switch
     {
-        LogLevel.Trace => Magenta,
+        LogLevel.Trace => Cyan,
         LogLevel.Debug => Blue,
         LogLevel.Information => Green,
         LogLevel.Warning => Yellow,
         LogLevel.Error => Red,
-        LogLevel.Critical => Red,
+        LogLevel.Fatal => Red,
         _ => Magenta,
     };
 

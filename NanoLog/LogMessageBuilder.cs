@@ -14,12 +14,11 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
 
         _writer = new LogMessageWriter();
     }
-    
+
     public readonly bool IsEnabled;
     private LogMessageWriter _writer;
 
-    [UnscopedRef]
-    internal ref LogMessage Message => ref _writer.Message;
+    [UnscopedRef] internal ref LogMessage Message => ref _writer.Message;
 
     public void AppendLiteral(string s)
     {
@@ -41,7 +40,32 @@ public interface ILogLevelHandler
     static abstract LogLevel Level { get; }
 }
 
+public readonly struct TraceLevel : ILogLevelHandler
+{
+    public static LogLevel Level => LogLevel.Trace;
+}
+
 public readonly struct DebugLevel : ILogLevelHandler
 {
     public static LogLevel Level => LogLevel.Debug;
+}
+
+public readonly struct InfoLevel : ILogLevelHandler
+{
+    public static LogLevel Level => LogLevel.Information;
+}
+
+public readonly struct WarnLevel : ILogLevelHandler
+{
+    public static LogLevel Level => LogLevel.Warning;
+}
+
+public readonly struct ErrorLevel : ILogLevelHandler
+{
+    public static LogLevel Level => LogLevel.Error;
+}
+
+public readonly struct FatalLevel : ILogLevelHandler
+{
+    public static LogLevel Level => LogLevel.Fatal;
 }
