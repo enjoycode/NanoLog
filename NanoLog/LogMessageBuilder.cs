@@ -39,6 +39,11 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
         _writer.AppendDateTime(name, value, format);
     }
 
+    public void AppendFormatted(string? value, [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendString(name, value);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void FinishWrite() => _writer.FinishWrite();
 }

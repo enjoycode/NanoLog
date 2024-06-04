@@ -63,6 +63,22 @@ public abstract unsafe class LogMessageVisitor
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ushort ReadUShort()
+    {
+        ushort res = 0;
+        ReadTo(new Span<byte>(&res, 2));
+        return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private uint ReadUInt()
+    {
+        uint res = 0;
+        ReadTo(new Span<byte>(&res, 4));
+        return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private long ReadLong()
     {
         var res = 0L;
@@ -100,6 +116,12 @@ public abstract unsafe class LogMessageVisitor
                 case TokenType.Literal1:
                     VisitLiteral(ReadChars(ReadByte()));
                     break;
+                case TokenType.Literal2:
+                    VisitLiteral(ReadChars(ReadUShort()));
+                    break;
+                case TokenType.Literal4:
+                    VisitLiteral(ReadChars((int)ReadUInt()));
+                    break;
                 case TokenType.Null:
                     VisitNull(ReadShortString());
                     break;
@@ -111,6 +133,15 @@ public abstract unsafe class LogMessageVisitor
                     break;
                 case TokenType.DateTime:
                     VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
+                    break;
+                case TokenType.String1:
+                    VisitString(ReadShortString(), ReadChars(ReadByte()));
+                    break;
+                case TokenType.String2:
+                    VisitString(ReadShortString(), ReadChars(ReadUShort()));
+                    break;
+                case TokenType.String4:
+                    VisitString(ReadShortString(), ReadChars((int)ReadUInt()));
                     break;
                 case TokenType.End:
                     return;
@@ -127,4 +158,6 @@ public abstract unsafe class LogMessageVisitor
     protected abstract void VisitBool(ReadOnlySpan<char> name, bool value);
 
     protected abstract void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
+
+    protected abstract void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
 }

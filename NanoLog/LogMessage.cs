@@ -37,6 +37,8 @@ public enum TokenType : byte
     Decimal,
     DateTime,
     Guid,
-    String,
+    String1,
+    String2,
+    String4,
     End = 0xFF
 }

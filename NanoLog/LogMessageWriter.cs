@@ -125,8 +125,14 @@ internal unsafe ref struct LogMessageWriter
             WriteUInt((uint)v.Length);
         }
 
-        var src = MemoryMarshal.AsBytes(v.AsSpan());
-        Write(src);
+        Write(MemoryMarshal.AsBytes(v.AsSpan()));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void AppendNull(string name)
+    {
+        WriteByte((byte)TokenType.Null);
+        WriteShortString(name);
     }
 
     public void AppendBool(string name, bool? v)
@@ -135,12 +141,10 @@ internal unsafe ref struct LogMessageWriter
         {
             WriteByte(v.Value ? (byte)TokenType.BoolTrue : (byte)TokenType.BoolFalse);
             WriteShortString(name);
+            return;
         }
-        else
-        {
-            WriteByte((byte)TokenType.Null);
-            WriteShortString(name);
-        }
+
+        AppendNull(name);
     }
 
     public void AppendDateTime(string name, DateTime? v, string? format)
@@ -153,12 +157,40 @@ internal unsafe ref struct LogMessageWriter
             var ticks = v.Value.ToUniversalTime().Ticks;
             var src = new ReadOnlySpan<byte>((byte*)&ticks, 8);
             Write(src);
+            return;
         }
-        else
+
+        AppendNull(name);
+    }
+
+    public void AppendString(string name, string? v)
+    {
+        if (v != null)
         {
-            WriteByte((byte)TokenType.Null);
-            WriteShortString(name);
+            if (v.Length < byte.MaxValue)
+            {
+                WriteByte((byte)TokenType.String1);
+                WriteShortString(name);
+                WriteByte((byte)v.Length);
+            }
+            else if (v.Length < ushort.MaxValue)
+            {
+                WriteByte((byte)TokenType.String2);
+                WriteShortString(name);
+                WriteUShort((ushort)v.Length);
+            }
+            else
+            {
+                WriteByte((byte)TokenType.String4);
+                WriteShortString(name);
+                WriteUInt((uint)v.Length);
+            }
+            
+            Write(MemoryMarshal.AsBytes(v.AsSpan()));
+            return;
         }
+
+        AppendNull(name);
     }
 
     public void FinishWrite()

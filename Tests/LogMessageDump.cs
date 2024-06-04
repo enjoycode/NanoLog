@@ -23,4 +23,9 @@ public sealed class LogMessageDump : LogMessageVisitor
     {
         Console.WriteLine($"DateTime: Name=\"{name}\" Format=\"{format}\" Value={value.ToLocalTime()}");
     }
+
+    protected override void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+    {
+        Console.WriteLine($"{name}=\"{value}\"");
+    }
 }
