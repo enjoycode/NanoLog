@@ -19,6 +19,7 @@ internal sealed class LogProcessor
 
     private readonly Channel<(LogEvent, LogMessage)> _channel; //TODO: custom channel for use ref to avoid some memcopy
     private readonly Thread _thread;
+    private readonly TaskCompletionSource _done = new();
 
     private async void ProcessLogQueue()
     {
@@ -36,6 +37,8 @@ internal sealed class LogProcessor
                     ArrayPool<byte>.Shared.Return(job.Item2.ExtData);
             }
         }
+        
+        _done.SetResult();
     }
 
     public void Enqueue(ref readonly LogEvent logEvent, ref readonly LogMessage message)
@@ -61,6 +64,8 @@ internal sealed class LogProcessor
     public void Stop()
     {
         _channel.Writer.Complete();
+        //_channel.Reader.Completion.Wait();
+        _done.Task.Wait();
         _thread.Join();
     }
 }

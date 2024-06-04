@@ -131,6 +131,9 @@ public abstract unsafe class LogMessageVisitor
                 case TokenType.BoolFalse:
                     VisitBool(ReadShortString(), false);
                     break;
+                case TokenType.Char:
+                    VisitChar(ReadShortString(), (char)ReadUShort());
+                    break;
                 case TokenType.DateTime:
                     VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
                     break;
@@ -156,6 +159,8 @@ public abstract unsafe class LogMessageVisitor
     protected abstract void VisitNull(ReadOnlySpan<char> name);
 
     protected abstract void VisitBool(ReadOnlySpan<char> name, bool value);
+
+    protected abstract void VisitChar(ReadOnlySpan<char> name, char value);
 
     protected abstract void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
 

@@ -71,9 +71,10 @@ internal unsafe ref struct LogMessageWriter
     {
         EnsureAvailable(2);
         var ptr = (byte*)&v;
-        var dest = WriteSpan;
+        var dest = WriteSpan[_pos..];
         dest[0] = ptr[0];
         dest[1] = ptr[1];
+        _pos += 2;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -81,11 +82,12 @@ internal unsafe ref struct LogMessageWriter
     {
         EnsureAvailable(4);
         var ptr = (byte*)&v;
-        var dest = WriteSpan;
+        var dest = WriteSpan[_pos..];
         dest[0] = ptr[0];
         dest[1] = ptr[1];
         dest[2] = ptr[2];
         dest[3] = ptr[3];
+        _pos += 4;
     }
 
     /// <summary>
@@ -101,8 +103,7 @@ internal unsafe ref struct LogMessageWriter
 
         var len = Math.Min(shortString.Length, 255);
         WriteByte((byte)len);
-        var src = MemoryMarshal.AsBytes(shortString.AsSpan(0, len));
-        Write(src);
+        Write(MemoryMarshal.AsBytes(shortString.AsSpan(0, len)));
     }
 
     #endregion
@@ -147,6 +148,19 @@ internal unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
+    public void AppendChar(string name, char? v)
+    {
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.Char);
+            WriteShortString(name);
+            WriteUShort((ushort)v);
+            return;
+        }
+
+        AppendNull(name);
+    }
+
     public void AppendDateTime(string name, DateTime? v, string? format)
     {
         if (v.HasValue)
@@ -185,7 +199,7 @@ internal unsafe ref struct LogMessageWriter
                 WriteShortString(name);
                 WriteUInt((uint)v.Length);
             }
-            
+
             Write(MemoryMarshal.AsBytes(v.AsSpan()));
             return;
         }

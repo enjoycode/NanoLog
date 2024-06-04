@@ -33,6 +33,11 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
         _writer.AppendBool(name, value);
     }
 
+    public void AppendFormatted(char? value, [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendChar(name, value);
+    }
+
     public void AppendFormatted(DateTime? value, string? format = null,
         [CallerArgumentExpression("value")] string name = "")
     {

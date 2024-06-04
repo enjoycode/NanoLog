@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace NanoLog;
 
 public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessageVisitor
@@ -21,6 +23,15 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         formatter.AfterToken(TokenType.Null);
     }
 
+    protected override void VisitChar(ReadOnlySpan<char> name, char value)
+    {
+        formatter.BeforeToken(TokenType.Char);
+        formatter.WriteByte((byte)'\'');
+        formatter.WriteChars(MemoryMarshal.CreateReadOnlySpan(ref value, 1));
+        formatter.WriteByte((byte)'\'');
+        formatter.AfterToken(TokenType.Char);
+    }
+
     protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         formatter.BeforeToken(TokenType.DateTime);
@@ -31,7 +42,9 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
     protected override void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
     {
         formatter.BeforeToken(TokenType.String4);
+        formatter.WriteByte((byte)'"');
         formatter.WriteChars(value);
+        formatter.WriteByte((byte)'"');
         formatter.AfterToken(TokenType.String4);
     }
 }
