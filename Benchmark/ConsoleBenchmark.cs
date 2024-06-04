@@ -5,7 +5,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Benchmark;
 
-[SimpleJob(launchCount: 1, warmupCount: 0, iterationCount: 1)]
+[SimpleJob(launchCount: 1, warmupCount: 1, iterationCount: 200, invocationCount:10000)]
 [MemoryDiagnoser]
 [ThreadingDiagnoser]
 public class ConsoleBenchmark
@@ -34,7 +34,7 @@ public class ConsoleBenchmark
     {
         _msLogger.LogInformation("Hello World {Now}", _now);
     }
-
+    
     [Benchmark]
     public void MsLogCodeGen()
     {
@@ -46,12 +46,13 @@ public class ConsoleBenchmark
 // Apple M1 Pro, 1 CPU, 10 logical and 10 physical cores
 //     .NET SDK 8.0.301
 //     [Host]     : .NET 8.0.6 (8.0.624.26715), Arm64 RyuJIT AdvSIMD
-// Job-QQHNWQ : .NET 8.0.6 (8.0.624.26715), Arm64 RyuJIT AdvSIMD
+// Job-RFJVHW : .NET 8.0.6 (8.0.624.26715), Arm64 RyuJIT AdvSIMD
 //
-//     IterationCount=1  LaunchCount=1  WarmupCount=0
+//     InvocationCount=10000  IterationCount=200  LaunchCount=1
+// WarmupCount=1
 //
-//     | Method    | Mean       | Error | Ratio | Gen0   | Gen1   | Allocated | Alloc Ratio |
-//     |---------- |-----------:|------:|------:|-------:|-------:|----------:|------------:|
-//     | NanoLog   |   786.6 ns |    NA |  0.20 | 0.1297 | 0.0439 |     816 B |        3.09 |
-//     | MsLog     | 3,937.6 ns |    NA |  1.00 | 0.0381 | 0.0153 |     264 B |        1.00 |
-//     | MsFastLog | 3,975.2 ns |    NA |  1.01 | 0.0305 | 0.0153 |     208 B |        0.79 |
+//     | Method       | Mean       | Error    | StdDev    | Ratio | RatioSD | Completed Work Items | Lock Contentions | Allocated | Alloc Ratio |
+//     |------------- |-----------:|---------:|----------:|------:|--------:|---------------------:|-----------------:|----------:|------------:|
+//     | NanoLog      |   154.6 ns |  0.91 ns |   3.48 ns |  0.04 |    0.00 |                    - |                - |         - |        0.00 |
+//     | MsLog        | 3,922.2 ns | 49.13 ns | 202.60 ns |  1.00 |    0.00 |                    - |           0.0004 |     264 B |        1.00 |
+//     | MsLogCodeGen | 4,079.3 ns | 52.49 ns | 218.77 ns |  1.04 |    0.07 |                    - |           0.0010 |     208 B |        0.79 |

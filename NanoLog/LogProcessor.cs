@@ -5,12 +5,10 @@ namespace NanoLog;
 
 internal sealed class LogProcessor
 {
-    public LogProcessor(int capacity = 10000)
+    public LogProcessor()
     {
-        _channel = Channel.CreateBounded<(LogEvent, LogMessage)>(new BoundedChannelOptions(capacity)
-            { SingleReader = true });
-        // _channel = Channel.CreateUnbounded<(LogEvent, LogMessage)>(
-        //     new UnboundedChannelOptions() { SingleReader = true });
+        _channel = Channel.CreateUnbounded<(LogEvent, LogMessage)>(
+            new UnboundedChannelOptions() { SingleReader = true });
         _thread = new Thread(ProcessLogQueue)
         {
             IsBackground = true,
