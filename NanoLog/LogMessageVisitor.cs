@@ -69,6 +69,14 @@ public abstract unsafe class LogMessageVisitor
         ReadTo(new Span<byte>(&res, 2));
         return res;
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ReadInt()
+    {
+        int res = 0;
+        ReadTo(new Span<byte>(&res, 4));
+        return res;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private uint ReadUInt()
@@ -134,6 +142,9 @@ public abstract unsafe class LogMessageVisitor
                 case TokenType.Char:
                     VisitChar(ReadShortString(), (char)ReadUShort());
                     break;
+                case TokenType.Int:
+                    VisitInt(ReadShortString(), ReadShortString(), ReadInt());
+                    break;
                 case TokenType.DateTime:
                     VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
                     break;
@@ -161,6 +172,8 @@ public abstract unsafe class LogMessageVisitor
     protected abstract void VisitBool(ReadOnlySpan<char> name, bool value);
 
     protected abstract void VisitChar(ReadOnlySpan<char> name, char value);
+
+    protected abstract void VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value);
 
     protected abstract void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
 

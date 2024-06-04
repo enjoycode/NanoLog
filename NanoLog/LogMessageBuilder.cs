@@ -38,6 +38,12 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
         _writer.AppendChar(name, value);
     }
 
+    public void AppendFormatted(int? value, string? format = null,
+        [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendInt(name, value, format);
+    }
+
     public void AppendFormatted(DateTime? value, string? format = null,
         [CallerArgumentExpression("value")] string name = "")
     {

@@ -24,6 +24,11 @@ public sealed class LogMessageDump : LogMessageVisitor
         Console.WriteLine($"{name}={value}");
     }
 
+    protected override void VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
+    {
+        Console.WriteLine($"Int: Name=\"{name}\" Format=\"{format}\" Value={value}");
+    }
+
     protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         Console.WriteLine($"DateTime: Name=\"{name}\" Format=\"{format}\" Value={value.ToLocalTime()}");

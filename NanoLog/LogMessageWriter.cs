@@ -161,6 +161,21 @@ internal unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
+    public void AppendInt(string name, int? v, string? format)
+    {
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.Int);
+            WriteShortString(name);
+            WriteShortString(format);
+            var value = v.Value;
+            Write(new ReadOnlySpan<byte>((byte*)&value, 4));
+            return;
+        }
+
+        AppendNull(name);
+    }
+
     public void AppendDateTime(string name, DateTime? v, string? format)
     {
         if (v.HasValue)
@@ -169,8 +184,7 @@ internal unsafe ref struct LogMessageWriter
             WriteShortString(name);
             WriteShortString(format);
             var ticks = v.Value.ToUniversalTime().Ticks;
-            var src = new ReadOnlySpan<byte>((byte*)&ticks, 8);
-            Write(src);
+            Write(new ReadOnlySpan<byte>((byte*)&ticks, 8));
             return;
         }
 

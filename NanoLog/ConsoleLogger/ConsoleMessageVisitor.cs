@@ -32,6 +32,13 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         formatter.AfterToken(TokenType.Char);
     }
 
+    protected override void VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
+    {
+        formatter.BeforeToken(TokenType.Int);
+        formatter.WriteFormattable(value, format);
+        formatter.AfterToken(TokenType.Int);
+    }
+
     protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         formatter.BeforeToken(TokenType.DateTime);
