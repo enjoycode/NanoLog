@@ -2,7 +2,8 @@ namespace NanoLog;
 
 public sealed class DefaultConsoleFormatter : ConsoleFormatter
 {
-    public DefaultConsoleFormatter(Stream output) : base(output)
+    public DefaultConsoleFormatter(Stream output, string timestampFormat = "yyyy-MM-dd hh:mm:ss.fff")
+        : base(output, timestampFormat)
     {
         _visitor = new ConsoleMessageVisitor(this);
     }
@@ -49,7 +50,7 @@ public sealed class DefaultConsoleFormatter : ConsoleFormatter
         //Timestamp
         WriteByte((byte)'[');
         WriteByte((byte)GetLevelChar(logEvent.Level));
-        WriteFormattable(logEvent.Time.ToLocalTime(), "yyyy-MM-dd hh:mm:ss.fff");
+        WriteFormattable(logEvent.Time.ToLocalTime(), TimestampFormat);
 
         //File source
         WriteByte((byte)' ');

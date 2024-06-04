@@ -6,8 +6,7 @@ public sealed class ConsoleLogger : ILogger
 {
     public ConsoleLogger(ConsoleFormatter? formatter = null)
     {
-        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        
+        //var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         var output = Console.OpenStandardOutput();
         _formatter = formatter ?? new DefaultConsoleFormatter(output);
     }

@@ -2,10 +2,12 @@ using System.Text.Unicode;
 
 namespace NanoLog;
 
-public abstract class ConsoleFormatter(Stream output)
+public abstract class ConsoleFormatter(Stream output, string timestampFormat = "yyyy-MM-dd hh:mm:ss.fff")
 {
     private readonly byte[] _buffer = new byte[256];
     private int _pos;
+
+    protected readonly string TimestampFormat = timestampFormat;
 
     public abstract void Output(ref readonly LogEvent logEvent, ref readonly LogMessage message);
 
