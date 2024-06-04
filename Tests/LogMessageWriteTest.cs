@@ -17,7 +17,7 @@ public class LogMessageWriteTest
         Console.WriteLine(Convert.ToHexString(span));
         Assert.IsTrue(span[0] == (byte)TokenType.Literal1);
         Assert.IsTrue(span[1] == literal.Length);
-        var charSpan = MemoryMarshal.Cast<byte, char>(span[2..]) ;
+        var charSpan = MemoryMarshal.Cast<byte, char>(span[2..]);
         Assert.IsTrue(literal.AsSpan().SequenceEqual(charSpan));
     }
 

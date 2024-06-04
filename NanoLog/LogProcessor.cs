@@ -5,9 +5,12 @@ namespace NanoLog;
 
 internal sealed class LogProcessor
 {
-    public LogProcessor(int capaticy = 1000)
+    public LogProcessor(int capacity = 10000)
     {
-        _channel = Channel.CreateBounded<(LogEvent, LogMessage)>(new BoundedChannelOptions(10) { SingleReader = true });
+        _channel = Channel.CreateBounded<(LogEvent, LogMessage)>(new BoundedChannelOptions(capacity)
+            { SingleReader = true });
+        // _channel = Channel.CreateUnbounded<(LogEvent, LogMessage)>(
+        //     new UnboundedChannelOptions() { SingleReader = true });
         _thread = new Thread(ProcessLogQueue)
         {
             IsBackground = true,
@@ -30,6 +33,7 @@ internal sealed class LogProcessor
                 {
                     logger.Log(ref job.Item1, ref job.Item2);
                 }
+
                 if (job.Item2.ExtData != null)
                     ArrayPool<byte>.Shared.Return(job.Item2.ExtData);
             }

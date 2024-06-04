@@ -95,6 +95,6 @@ public abstract class ConsoleFormatter(Stream output)
         if (_pos == 0) return;
         output.Write(_buffer, 0, _pos);
         _pos = 0;
-        output.Flush();
+        // output.Flush();
     }
 }
