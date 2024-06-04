@@ -129,6 +129,20 @@ internal unsafe ref struct LogMessageWriter
         Write(src);
     }
 
+    public void AppendBool(string name, bool? v)
+    {
+        if (v.HasValue)
+        {
+            WriteByte(v.Value ? (byte)TokenType.BoolTrue : (byte)TokenType.BoolFalse);
+            WriteShortString(name);
+        }
+        else
+        {
+            WriteByte((byte)TokenType.Null);
+            WriteShortString(name);
+        }
+    }
+
     public void AppendDateTime(string name, DateTime? v, string? format)
     {
         if (v.HasValue)

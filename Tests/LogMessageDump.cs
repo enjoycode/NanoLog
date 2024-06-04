@@ -14,6 +14,11 @@ public sealed class LogMessageDump : LogMessageVisitor
         Console.WriteLine($"{name} is NULL");
     }
 
+    protected override void VisitBool(ReadOnlySpan<char> name, bool value)
+    {
+        Console.WriteLine($"{name}={value}");
+    }
+
     protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         Console.WriteLine($"DateTime: Name=\"{name}\" Format=\"{format}\" Value={value.ToLocalTime()}");

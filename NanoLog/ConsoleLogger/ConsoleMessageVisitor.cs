@@ -14,6 +14,13 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         formatter.AfterToken(TokenType.Null);
     }
 
+    protected override void VisitBool(ReadOnlySpan<char> name, bool value)
+    {
+        formatter.BeforeToken(TokenType.Null);
+        formatter.WriteChars(value ? "True" : "False");
+        formatter.AfterToken(TokenType.Null);
+    }
+
     protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         formatter.BeforeToken(TokenType.DateTime);

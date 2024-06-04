@@ -7,7 +7,8 @@ namespace NanoLog;
 public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
 {
     public LogMessageBuilder([SuppressMessage("ReSharper", "UnusedParameter.Local")] int literalLength,
-        [SuppressMessage("ReSharper", "UnusedParameter.Local")] int formattedCount, NanoLogger logger,
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+        int formattedCount, NanoLogger logger,
         out bool isEnabled)
     {
         IsEnabled = isEnabled = logger.IsEnabled(T.Level);
@@ -25,6 +26,11 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
     public void AppendLiteral(string s)
     {
         _writer.AppendLiteral(s);
+    }
+
+    public void AppendFormatted(bool? value, [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendBool(name, value);
     }
 
     public void AppendFormatted(DateTime? value, string? format = null,
