@@ -55,6 +55,12 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
         _writer.AppendString(name, value);
     }
 
+    public void AppendFormatted<TValue>(TValue value, [CallerArgumentExpression("value")] string name = "")
+        where TValue : struct, ILogValue
+    {
+        _writer.AppendLogValue(name, ref value);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void FinishWrite() => _writer.FinishWrite();
 }

@@ -9,6 +9,12 @@ public abstract unsafe class LogMessageVisitor
     private byte[]? _extData;
     private int _pos;
     private bool _useExt;
+    private bool _firstMember;
+    private int _depth;
+
+    protected bool IsLogValueMember => _depth > 0;
+
+    protected bool IsFirstMember => _firstMember;
 
     #region =====Read Data====
 
@@ -69,7 +75,7 @@ public abstract unsafe class LogMessageVisitor
         ReadTo(new Span<byte>(&res, 2));
         return res;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int ReadInt()
     {
@@ -108,6 +114,7 @@ public abstract unsafe class LogMessageVisitor
 
     public void Visit(ref readonly LogMessage message)
     {
+        _depth = 0;
         _pos = 0;
         _useExt = false;
         _innerDataPtr = (byte*)Unsafe.AsPointer(ref message.DataPtr);
@@ -132,30 +139,49 @@ public abstract unsafe class LogMessageVisitor
                     break;
                 case TokenType.Null:
                     VisitNull(ReadShortString());
+                    _firstMember = false;
                     break;
                 case TokenType.BoolTrue:
                     VisitBool(ReadShortString(), true);
+                    _firstMember = false;
                     break;
                 case TokenType.BoolFalse:
                     VisitBool(ReadShortString(), false);
+                    _firstMember = false;
                     break;
                 case TokenType.Char:
                     VisitChar(ReadShortString(), (char)ReadUShort());
+                    _firstMember = false;
                     break;
                 case TokenType.Int:
                     VisitInt(ReadShortString(), ReadShortString(), ReadInt());
+                    _firstMember = false;
                     break;
                 case TokenType.DateTime:
                     VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
+                    _firstMember = false;
                     break;
                 case TokenType.String1:
                     VisitString(ReadShortString(), ReadChars(ReadByte()));
+                    _firstMember = false;
                     break;
                 case TokenType.String2:
                     VisitString(ReadShortString(), ReadChars(ReadUShort()));
+                    _firstMember = false;
                     break;
                 case TokenType.String4:
                     VisitString(ReadShortString(), ReadChars((int)ReadUInt()));
+                    _firstMember = false;
+                    break;
+                case TokenType.LogValue:
+                    BeginVisitLogValue(ReadShortString());
+                    _firstMember = true;
+                    _depth++;
+                    break;
+                case TokenType.LogValueEndMembers:
+                    _depth--;
+                    _firstMember = false;
+                    EndVisitLogValue();
                     break;
                 case TokenType.End:
                     return;
@@ -178,4 +204,8 @@ public abstract unsafe class LogMessageVisitor
     protected abstract void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
 
     protected abstract void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
+
+    protected abstract void BeginVisitLogValue(ReadOnlySpan<char> name);
+
+    protected abstract void EndVisitLogValue();
 }

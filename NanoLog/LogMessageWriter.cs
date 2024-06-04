@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace NanoLog;
 
-internal unsafe ref struct LogMessageWriter
+public unsafe ref struct LogMessageWriter
 {
     public LogMessageWriter()
     {
@@ -108,7 +108,7 @@ internal unsafe ref struct LogMessageWriter
 
     #endregion
 
-    public void AppendLiteral(string v)
+    internal void AppendLiteral(string v)
     {
         if (v.Length < byte.MaxValue)
         {
@@ -161,7 +161,7 @@ internal unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
-    public void AppendInt(string name, int? v, string? format)
+    public void AppendInt(string name, int? v, string? format = null)
     {
         if (v.HasValue)
         {
@@ -176,7 +176,7 @@ internal unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
-    public void AppendDateTime(string name, DateTime? v, string? format)
+    public void AppendDateTime(string name, DateTime? v, string? format = null)
     {
         if (v.HasValue)
         {
@@ -221,7 +221,15 @@ internal unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
-    public void FinishWrite()
+    public void AppendLogValue<T>(string name, ref T v) where T : struct, ILogValue
+    {
+        WriteByte((byte)TokenType.LogValue);
+        WriteShortString(name);
+        v.AppendMembers(ref this);
+        WriteByte((byte)TokenType.LogValueEndMembers);
+    }
+
+    internal void FinishWrite()
     {
         if (!UseExt && _pos == LogMessage.InnerDataSize)
             return; //正好全部使用内置数据块

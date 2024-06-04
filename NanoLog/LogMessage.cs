@@ -40,5 +40,7 @@ public enum TokenType : byte
     String1,
     String2,
     String4,
+    LogValue,
+    LogValueEndMembers,
     End = 0xFF
 }

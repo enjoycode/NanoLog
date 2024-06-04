@@ -38,4 +38,14 @@ public sealed class LogMessageDump : LogMessageVisitor
     {
         Console.WriteLine($"{name}=\"{value}\"");
     }
+
+    protected override void BeginVisitLogValue(ReadOnlySpan<char> name)
+    {
+        Console.Write("{");
+    }
+
+    protected override void EndVisitLogValue()
+    {
+        Console.Write("}");
+    }
 }
