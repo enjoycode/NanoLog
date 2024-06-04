@@ -130,7 +130,7 @@ public unsafe ref struct LogMessageWriter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void AppendNull(string name)
+    internal void AppendNull(string name)
     {
         WriteByte((byte)TokenType.Null);
         WriteShortString(name);
@@ -221,7 +221,15 @@ public unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
-    public void AppendLogValue<T>(string name, ref T v) where T : struct, ILogValue
+    public void AppendLogValue<T>(string name, in T v) where T : ILogValue
+    {
+        WriteByte((byte)TokenType.LogValue);
+        WriteShortString(name);
+        v.AppendMembers(ref this);
+        WriteByte((byte)TokenType.LogValueEndMembers);
+    }
+
+    public void AppendStructLogValue<T>(string name, ref T v) where T : struct, ILogValue
     {
         WriteByte((byte)TokenType.LogValue);
         WriteShortString(name);
