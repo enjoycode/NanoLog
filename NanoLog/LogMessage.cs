@@ -17,11 +17,26 @@ public struct LogMessage
 
 public enum TokenType : byte
 {
-    Null,
+    None,
     Literal1,
     Literal2,
     Literal4,
+    Null,
+    BoolTrue,
+    BoolFalse,
+    Byte,
+    Char,
+    Short,
+    UShort,
+    Int,
+    UInt,
+    Long,
+    ULong,
+    Float,
+    Double,
+    Decimal,
     DateTime,
-    FormattedString,
+    Guid,
+    String,
     End = 0xFF
 }

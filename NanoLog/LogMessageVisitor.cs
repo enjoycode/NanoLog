@@ -100,6 +100,9 @@ public abstract unsafe class LogMessageVisitor
                 case TokenType.Literal1:
                     VisitLiteral(ReadChars(ReadByte()));
                     break;
+                case TokenType.Null:
+                    VisitNull(ReadShortString());
+                    break;
                 case TokenType.DateTime:
                     VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
                     break;
@@ -112,6 +115,8 @@ public abstract unsafe class LogMessageVisitor
     }
 
     protected abstract void VisitLiteral(ReadOnlySpan<char> chars);
+
+    protected abstract void VisitNull(ReadOnlySpan<char> name);
 
     protected abstract void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
 }

@@ -129,14 +129,22 @@ internal unsafe ref struct LogMessageWriter
         Write(src);
     }
 
-    public void AppendDateTime(string name, DateTime v, string? format)
+    public void AppendDateTime(string name, DateTime? v, string? format)
     {
-        WriteByte((byte)TokenType.DateTime);
-        WriteShortString(name);
-        WriteShortString(format);
-        var ticks = v.ToUniversalTime().Ticks;
-        var src = new ReadOnlySpan<byte>((byte*)&ticks, 8);
-        Write(src);
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.DateTime);
+            WriteShortString(name);
+            WriteShortString(format);
+            var ticks = v.Value.ToUniversalTime().Ticks;
+            var src = new ReadOnlySpan<byte>((byte*)&ticks, 8);
+            Write(src);
+        }
+        else
+        {
+            WriteByte((byte)TokenType.Null);
+            WriteShortString(name);
+        }
     }
 
     public void FinishWrite()
