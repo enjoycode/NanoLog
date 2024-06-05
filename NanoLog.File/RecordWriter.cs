@@ -4,14 +4,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace NanoLog.File;
 
-internal sealed class RecordWriter
+internal sealed class RecordWriter(FileLogger logger)
 {
-    public RecordWriter(FileLogger logger)
-    {
-        _logger = logger;
-    }
-
-    private readonly FileLogger _logger;
     private readonly byte[] _buffer = new byte[FileLogger.PAGE_SIZE];
     internal SafeFileHandle? FileHandle;
     private int _pagePos;
@@ -29,7 +23,7 @@ internal sealed class RecordWriter
 
     // |-----------------Record---------------|
     // |-Header-|--EventData--|--MessageData--|
-    // | 2Byte  |   n Bytes   |     nBytes    |
+    // | 4Byte  |   n Bytes   |     nBytes    |
 
     internal unsafe void Write(ref readonly LogEvent logEvent, ref readonly LogMessage message)
     {
@@ -61,7 +55,16 @@ internal sealed class RecordWriter
         //Line
         var line = logEvent.Line;
         WriteToBuffer(new ReadOnlySpan<byte>(&line, 4));
-        
+
+        //Message
+        //Length info
+        var len = (message.InnerDataLength << 24) | (message.OuterDataLength & 0xFFFFFF);
+        WriteToBuffer(new ReadOnlySpan<byte>(&len, 4));
+        //InnerData & OuterData
+        WriteToBuffer(message.InnerDataForRead);
+        WriteToBuffer(message.OuterDataForRead);
+
+        FinishRecord(true);
     }
 
     private void WriteShortString(string value)
@@ -126,7 +129,7 @@ internal sealed class RecordWriter
 
     private void MoveToNextPage()
     {
-        RandomAccess.Write(FileHandle!, _buffer, _pagePos);
+        WriteBufferToFile();
         _pagePos += FileLogger.PAGE_SIZE;
         _writePos = 0;
         ClearBuffer();
@@ -135,7 +138,7 @@ internal sealed class RecordWriter
     private void MoveToNextFile(DateTime start)
     {
         FileHandle?.Close();
-        FileHandle = _logger.CreateFile(_logger.CurrentSeq + 1, start);
+        FileHandle = logger.CreateFile(logger.CurrentSeq + 1, start);
 
         ClearBuffer();
         _pagePos = 0;
@@ -144,4 +147,11 @@ internal sealed class RecordWriter
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ClearBuffer() => _buffer.AsSpan().Clear();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void WriteBufferToFile()
+    {
+        if (FileHandle != null && _pagePos != 0)
+            RandomAccess.Write(FileHandle!, _buffer, _pagePos);
+    }
 }

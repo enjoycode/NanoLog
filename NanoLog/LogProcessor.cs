@@ -25,9 +25,9 @@ internal sealed class LogProcessor
     {
         while (await _channel.Reader.WaitToReadAsync())
         {
+            var loggers = NanoLogger.Options.Loggers;
             while (_channel.Reader.TryRead(out var job))
             {
-                var loggers = NanoLogger.Options.Loggers;
                 foreach (var logger in loggers)
                 {
                     logger.Log(ref job.Item1, ref job.Item2);
@@ -35,6 +35,11 @@ internal sealed class LogProcessor
 
                 if (job.Item2.OuterData != null)
                     ArrayPool<byte>.Shared.Return(job.Item2.OuterData);
+            }
+
+            foreach (var logger in loggers)
+            {
+                logger.Flush();
             }
         }
         

@@ -39,7 +39,12 @@ public sealed class FileLogger : ILogger
 
     public void Log(ref readonly LogEvent logEvent, ref readonly LogMessage message)
     {
-        throw new NotImplementedException();
+        _recordWriter.Write(in logEvent, in message);
+    }
+
+    public void Flush()
+    {
+        _recordWriter.WriteBufferToFile();
     }
 
     #region ====Files====

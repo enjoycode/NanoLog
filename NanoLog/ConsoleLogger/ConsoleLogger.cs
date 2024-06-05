@@ -15,4 +15,9 @@ public sealed class ConsoleLogger : ILogger
     {
         _formatter.Output(in logEvent, in message);
     }
+
+    public void Flush()
+    {
+        //TODO: maybe flush Console's output?
+    }
 }

@@ -26,6 +26,10 @@ public struct LogMessage
     }
 
     [UnscopedRef] internal ref byte InnerDataPtr => ref InnerData;
+
+    public ReadOnlySpan<byte> InnerDataForRead => MemoryMarshal.CreateReadOnlySpan(ref InnerData, InnerDataLength);
+
+    public ReadOnlySpan<byte> OuterDataForRead => OuterData == null ? default : OuterData.AsSpan(0, OuterDataLength);
 }
 
 public enum TokenType : byte
