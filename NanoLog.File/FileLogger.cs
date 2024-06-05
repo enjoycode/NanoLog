@@ -18,7 +18,8 @@ public sealed class FileLogger : ILogger
         }
         else
         {
-            _files.AddRange(Directory.EnumerateFiles(_folder));
+            var exists = Directory.EnumerateFiles(_folder).Select(f => Path.GetFileName(f)!);
+            _files.AddRange(exists);
             //按流水号排序
             _files.Sort((a, b) => ParseSeqFromName(a).CompareTo(ParseSeqFromName(b)));
             lastSeq = CurrentSeq;
@@ -37,6 +38,8 @@ public sealed class FileLogger : ILogger
 
     internal ulong CurrentSeq => _files.Count == 0 ? 0 : ParseSeqFromName(_files[^1]);
 
+    internal IReadOnlyList<string> Files => _files;
+
     public void Log(ref readonly LogEvent logEvent, ref readonly LogMessage message)
     {
         _recordWriter.Write(in logEvent, in message);
@@ -50,7 +53,7 @@ public sealed class FileLogger : ILogger
     #region ====Files====
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string MakeFileName(ulong seq, DateTime start) => $"{seq:x16}-{start:yyMMdd-hh}";
+    private static string MakeFileName(ulong seq, DateTime start) => $"{seq:x16}-{start:yyMMdd-HH}";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong ParseSeqFromName(string fileName) =>
@@ -64,6 +67,7 @@ public sealed class FileLogger : ILogger
         {
             var fileHandler = System.IO.File.OpenHandle(fullPath, FileMode.CreateNew,
                 access: FileAccess.Write,
+                share: FileShare.Read,
                 options: FileOptions.None,
                 preallocationSize: FILE_SIZE);
             _files.Add(fileName);

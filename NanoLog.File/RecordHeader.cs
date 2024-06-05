@@ -22,4 +22,5 @@ internal struct RecordHeader
     public ushort RecordSize;
 
     internal const int HEADER_SIZE = 4;
+    internal const byte RESERVED_DATA = 0xAB;
 }

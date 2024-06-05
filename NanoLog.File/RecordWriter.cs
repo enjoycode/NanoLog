@@ -43,7 +43,7 @@ internal sealed class RecordWriter(FileLogger logger)
 
         StartRecord(true);
 
-        //DebugLevel
+        //Level
         _buffer[_writePos++] = (byte)logEvent.Level;
         //Timestamp
         var ticks = logEvent.Time.Ticks;
@@ -114,6 +114,7 @@ internal sealed class RecordWriter(FileLogger logger)
     private void StartRecord(bool isFirst)
     {
         _headerPos = _writePos;
+        HeaderPtr.Reserved = RecordHeader.RESERVED_DATA;
         HeaderPtr.Flag = isFirst ? RecordFlag.First : RecordFlag.Middle;
         _writePos += RecordHeader.HEADER_SIZE;
     }
@@ -151,7 +152,7 @@ internal sealed class RecordWriter(FileLogger logger)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void WriteBufferToFile()
     {
-        if (FileHandle != null && _pagePos != 0)
+        if (FileHandle != null && _writePos != 0)
             RandomAccess.Write(FileHandle!, _buffer, _pagePos);
     }
 }

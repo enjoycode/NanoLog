@@ -25,7 +25,7 @@ public struct LogMessage
         internal set => Length |= (value & 0xFFFFFF);
     }
 
-    [UnscopedRef] internal ref byte InnerDataPtr => ref InnerData;
+    [UnscopedRef] public ref byte InnerDataPtr => ref InnerData;
 
     public ReadOnlySpan<byte> InnerDataForRead => MemoryMarshal.CreateReadOnlySpan(ref InnerData, InnerDataLength);
 
