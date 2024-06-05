@@ -56,7 +56,7 @@ public sealed class DefaultConsoleFormatter : ConsoleFormatter
         WriteByte((byte)' ');
         WriteChars(Path.GetFileName(logEvent.File.AsSpan()));
         WriteByte((byte)'.');
-        WriteChars(logEvent.Method);
+        WriteChars(logEvent.Member);
         WriteByte((byte)':');
         WriteFormattable(logEvent.Line);
 
