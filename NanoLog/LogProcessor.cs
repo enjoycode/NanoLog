@@ -33,8 +33,8 @@ internal sealed class LogProcessor
                     logger.Log(ref job.Item1, ref job.Item2);
                 }
 
-                if (job.Item2.ExtData != null)
-                    ArrayPool<byte>.Shared.Return(job.Item2.ExtData);
+                if (job.Item2.OuterData != null)
+                    ArrayPool<byte>.Shared.Return(job.Item2.OuterData);
             }
         }
         

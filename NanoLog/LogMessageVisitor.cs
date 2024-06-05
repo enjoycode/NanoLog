@@ -117,8 +117,8 @@ public abstract unsafe class LogMessageVisitor
         _depth = 0;
         _pos = 0;
         _useExt = false;
-        _innerDataPtr = (byte*)Unsafe.AsPointer(ref message.DataPtr);
-        _extData = message.ExtData;
+        _innerDataPtr = (byte*)Unsafe.AsPointer(ref message.InnerDataPtr);
+        _extData = message.OuterData;
 
         while (true)
         {

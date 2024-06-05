@@ -19,18 +19,18 @@ public unsafe ref struct LogMessageWriter
     /// <summary>
     /// 是否使用了扩展的数据存储
     /// </summary>
-    private bool UseExt => _msg.ExtData != null;
+    private bool UseOuter => _msg.OuterData != null;
 
     #region ====Write Data====
 
-    private Span<byte> WriteSpan => !UseExt
-        ? MemoryMarshal.CreateSpan(ref _msg.DataPtr, LogMessage.InnerDataSize)
-        : _msg.ExtData!.AsSpan();
+    private Span<byte> WriteSpan => !UseOuter
+        ? MemoryMarshal.CreateSpan(ref _msg.InnerDataPtr, LogMessage.InnerDataSize)
+        : _msg.OuterData!.AsSpan();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EnsureAvailable(int required)
     {
-        var available = !UseExt ? LogMessage.InnerDataSize - _pos : _msg.ExtData!.Length - _pos;
+        var available = !UseOuter ? LogMessage.InnerDataSize - _pos : _msg.OuterData!.Length - _pos;
         if (available >= required)
             return;
         Grow(required);
@@ -38,18 +38,19 @@ public unsafe ref struct LogMessageWriter
 
     private void Grow(int required)
     {
-        if (!UseExt)
+        if (!UseOuter)
         {
-            _msg.ExtData = ArrayPool<byte>.Shared.Rent(Math.Max(256, required));
+            _msg.InnerDataLength = _pos;
+            _msg.OuterData = ArrayPool<byte>.Shared.Rent(Math.Max(256, required));
             _pos = 0;
         }
         else
         {
             //TODO:考虑自定义ArrayPool，因为multi thread rent, one thread return.
-            var newExtData = ArrayPool<byte>.Shared.Rent(Math.Max(required, (int)(_msg.ExtData!.Length * 1.5)));
-            _msg.ExtData.AsSpan().CopyTo(newExtData.AsSpan());
-            ArrayPool<byte>.Shared.Return(_msg.ExtData);
-            _msg.ExtData = newExtData;
+            var newExtData = ArrayPool<byte>.Shared.Rent(Math.Max(required, (int)(_msg.OuterData!.Length * 1.5)));
+            _msg.OuterData.AsSpan().CopyTo(newExtData.AsSpan());
+            ArrayPool<byte>.Shared.Return(_msg.OuterData);
+            _msg.OuterData = newExtData;
         }
     }
 
@@ -239,8 +240,16 @@ public unsafe ref struct LogMessageWriter
 
     internal void FinishWrite()
     {
-        if (!UseExt && _pos == LogMessage.InnerDataSize)
+        if (!UseOuter && _pos == LogMessage.InnerDataSize)
+        {
+            _msg.InnerDataLength = LogMessage.InnerDataSize;
             return; //正好全部使用内置数据块
+        }
+
         WriteSpan[_pos++] = (byte)TokenType.End;
+        if (UseOuter)
+            _msg.OuterDataLength = _pos;
+        else
+            _msg.InnerDataLength = _pos;
     }
 }
