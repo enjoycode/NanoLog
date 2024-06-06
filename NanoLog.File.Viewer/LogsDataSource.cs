@@ -13,6 +13,7 @@ internal sealed class LogsDataSource : IListDataSource
     }
 
     private readonly List<(LogEvent, LogMessage)> _list;
+    private static readonly TuiMessageVisitor _visitor = new();
 
     public int Count => _list.Count;
     public int Length => 800; //TODO:
@@ -32,26 +33,29 @@ internal sealed class LogsDataSource : IListDataSource
         ref var logMessage = ref span[line].Item2;
 
         //TODO: maybe use bytes buffer?
-        driver.AddRune('[');
         SetColorByLevel(driver, out var current, logEvent.Level);
+        driver.AddRune('[');
         WriteLevel(driver, logEvent.Level);
         //Timestamp
         driver.AddStr(logEvent.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff"));
-        
+
         //File
         driver.AddRune(' ');
-        driver.AddStr(Path.GetFileName(logEvent.File.AsSpan()).ToString());
-        driver.AddRune('.');
-        driver.AddStr(logEvent.Member);
+        driver.AddChars(Path.GetFileName(logEvent.File.AsSpan()));
+        // driver.AddRune('.');
+        // driver.AddStr(logEvent.Member);
         driver.AddRune(':');
         driver.AddStr(logEvent.Line.ToString());
 
         driver.AddRune(']');
         driver.AddRune(' ');
 
-        
-
+        //Reset color
         driver.SetAttribute(current);
+
+        //Message
+        _visitor.Driver = driver;
+        _visitor.Visit(ref logMessage);
     }
 
     private static void WriteLevel(ConsoleDriver driver, LogLevel level)

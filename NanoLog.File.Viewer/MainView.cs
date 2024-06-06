@@ -7,7 +7,7 @@ public sealed class MainView : Toplevel
     private readonly ListView _filesListView;
     private readonly ListView _logsListView;
     private string _logsFolder = null!;
-    private string _currentTheme = "Default";
+    private string _currentTheme = "Light";
 
     public MainView()
     {
