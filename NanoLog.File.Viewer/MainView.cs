@@ -56,12 +56,14 @@ public sealed class MainView : Toplevel
                 Title = $"_{theme.Key}",
                 Shortcut = (KeyCode)new Key((KeyCode)((uint)KeyCode.D1 + schemeCount++)).WithCtrl
             };
-            // item.CheckType |= MenuItemCheckStyle.Checked;
-            // item.Checked = theme.Key == _currentTheme; //需要重新创建
+            item.CheckType |= MenuItemCheckStyle.Checked;
+            item.Checked = theme.Key == _currentTheme;
 
             item.Action += () =>
             {
                 ConfigurationManager.Themes.Theme = _currentTheme = theme.Key;
+                items.ForEach(m => m.Checked = false);
+                item.Checked = true;
                 ConfigurationManager.Apply();
                 Application.Top.SetNeedsDisplay();
             };
