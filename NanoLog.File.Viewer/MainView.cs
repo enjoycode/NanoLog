@@ -7,6 +7,7 @@ public sealed class MainView : Toplevel
     private readonly ListView _filesListView;
     private readonly LogsTableView _logsTableView;
     private string _logsFolder = null!;
+    private string _currentTheme = "Default";
 
     private static readonly LogsTableSource EmptyTableSource = new([]);
 
@@ -25,6 +26,8 @@ public sealed class MainView : Toplevel
         Add(StatusBar);
     }
 
+    #region ====UI Build====
+
     private MenuBar BuildMenuBar() => new()
     {
         Menus =
@@ -34,12 +37,39 @@ public sealed class MainView : Toplevel
                 new MenuItem("_Open", null, OnOpenFolder, null, null, KeyCode.O | KeyCode.CtrlMask),
                 new MenuItem("_Quit", null, RequestStop, null, null, KeyCode.Q | KeyCode.CtrlMask),
             ]),
+            new MenuBarItem("_Theme", CreateThemeMenuItems()),
             new MenuBarItem("_Help",
             [
                 new MenuItem("_About...", null, ShowAbout, null, null)
             ]),
         ]
     };
+
+    private MenuItem[] CreateThemeMenuItems()
+    {
+        var items = new List<MenuItem>();
+        var schemeCount = 0;
+        foreach (var theme in ConfigurationManager.Themes!)
+        {
+            var item = new MenuItem
+            {
+                Title = $"_{theme.Key}",
+                Shortcut = (KeyCode)new Key((KeyCode)((uint)KeyCode.D1 + schemeCount++)).WithCtrl
+            };
+            // item.CheckType |= MenuItemCheckStyle.Checked;
+            // item.Checked = theme.Key == _currentTheme; //需要重新创建
+
+            item.Action += () =>
+            {
+                ConfigurationManager.Themes.Theme = _currentTheme = theme.Key;
+                ConfigurationManager.Apply();
+                Application.Top.SetNeedsDisplay();
+            };
+            items.Add(item);
+        }
+
+        return items.ToArray();
+    }
 
     private static StatusBar BuildStatusBar() => new()
     {
@@ -98,6 +128,10 @@ public sealed class MainView : Toplevel
         MessageBox.Query("About...", "EnjoyCode", "_Ok");
     }
 
+    #endregion
+
+    #region ====Event Hander====
+
     private void OnOpenFolder()
     {
         var dlg = new OpenDialog()
@@ -139,4 +173,6 @@ public sealed class MainView : Toplevel
         var tableSource = new LogsTableSource(logsReader.AllRecords);
         _logsTableView.Table = tableSource;
     }
+
+    #endregion
 }
