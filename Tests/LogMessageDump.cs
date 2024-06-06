@@ -4,48 +4,57 @@ namespace Tests;
 
 public sealed class LogMessageDump : LogMessageVisitor
 {
-    protected override void VisitLiteral(ReadOnlySpan<char> chars)
+    protected override bool VisitLiteral(ReadOnlySpan<char> chars)
     {
         Console.WriteLine($"Literal: {chars}");
+        return false;
     }
 
-    protected override void VisitNull(ReadOnlySpan<char> name)
+    protected override bool VisitNull(ReadOnlySpan<char> name)
     {
         Console.WriteLine($"{name} is NULL");
+        return false;
     }
 
-    protected override void VisitBool(ReadOnlySpan<char> name, bool value)
+    protected override bool VisitBool(ReadOnlySpan<char> name, bool value)
     {
         Console.WriteLine($"{name}={value}");
+        return false;
     }
 
-    protected override void VisitChar(ReadOnlySpan<char> name, char value)
+    protected override bool VisitChar(ReadOnlySpan<char> name, char value)
     {
         Console.WriteLine($"{name}={value}");
+        return false;
     }
 
-    protected override void VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
+    protected override bool VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
     {
         Console.WriteLine($"Int: Name=\"{name}\" Format=\"{format}\" Value={value}");
+        return false;
     }
 
-    protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
+    protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         Console.WriteLine($"DateTime: Name=\"{name}\" Format=\"{format}\" Value={value.ToLocalTime()}");
+        return false;
     }
 
-    protected override void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+    protected override bool VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
     {
         Console.WriteLine($"{name}=\"{value}\"");
+        return false;
     }
 
-    protected override void BeginVisitLogValue(ReadOnlySpan<char> name)
+    protected override bool BeginVisitLogValue(ReadOnlySpan<char> name)
     {
         Console.Write("{");
+        return false;
     }
 
-    protected override void EndVisitLogValue()
+    protected override bool EndVisitLogValue()
     {
         Console.Write("}");
+        return false;
     }
 }

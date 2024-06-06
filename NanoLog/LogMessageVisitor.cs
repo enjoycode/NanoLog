@@ -129,59 +129,73 @@ public abstract unsafe class LogMessageVisitor
             switch (tokenType)
             {
                 case TokenType.Literal1:
-                    VisitLiteral(ReadChars(ReadByte()));
+                    if (VisitLiteral(ReadChars(ReadByte())))
+                        return;
                     break;
                 case TokenType.Literal2:
-                    VisitLiteral(ReadChars(ReadUShort()));
+                    if (VisitLiteral(ReadChars(ReadUShort())))
+                        return;
                     break;
                 case TokenType.Literal4:
-                    VisitLiteral(ReadChars((int)ReadUInt()));
+                    if (VisitLiteral(ReadChars((int)ReadUInt())))
+                        return;
                     break;
                 case TokenType.Null:
-                    VisitNull(ReadShortString());
+                    if (VisitNull(ReadShortString()))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.BoolTrue:
-                    VisitBool(ReadShortString(), true);
+                    if(VisitBool(ReadShortString(), true))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.BoolFalse:
-                    VisitBool(ReadShortString(), false);
+                    if (VisitBool(ReadShortString(), false))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.Char:
-                    VisitChar(ReadShortString(), (char)ReadUShort());
+                    if (VisitChar(ReadShortString(), (char)ReadUShort()))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.Int:
-                    VisitInt(ReadShortString(), ReadShortString(), ReadInt());
+                    if (VisitInt(ReadShortString(), ReadShortString(), ReadInt()))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.DateTime:
-                    VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime());
+                    if (VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime()))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.String1:
-                    VisitString(ReadShortString(), ReadChars(ReadByte()));
+                    if (VisitString(ReadShortString(), ReadChars(ReadByte())))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.String2:
-                    VisitString(ReadShortString(), ReadChars(ReadUShort()));
+                    if (VisitString(ReadShortString(), ReadChars(ReadUShort())))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.String4:
-                    VisitString(ReadShortString(), ReadChars((int)ReadUInt()));
+                    if (VisitString(ReadShortString(), ReadChars((int)ReadUInt())))
+                        return;
                     _firstMember = false;
                     break;
                 case TokenType.LogValue:
-                    BeginVisitLogValue(ReadShortString());
+                    if (BeginVisitLogValue(ReadShortString()))
+                        return;
                     _firstMember = true;
                     _depth++;
                     break;
                 case TokenType.LogValueEndMembers:
                     _depth--;
                     _firstMember = false;
-                    EndVisitLogValue();
+                    if (EndVisitLogValue())
+                        return;
                     break;
                 case TokenType.End:
                     return;
@@ -191,21 +205,21 @@ public abstract unsafe class LogMessageVisitor
         }
     }
 
-    protected abstract void VisitLiteral(ReadOnlySpan<char> chars);
+    protected abstract bool VisitLiteral(ReadOnlySpan<char> chars);
 
-    protected abstract void VisitNull(ReadOnlySpan<char> name);
+    protected abstract bool VisitNull(ReadOnlySpan<char> name);
 
-    protected abstract void VisitBool(ReadOnlySpan<char> name, bool value);
+    protected abstract bool VisitBool(ReadOnlySpan<char> name, bool value);
 
-    protected abstract void VisitChar(ReadOnlySpan<char> name, char value);
+    protected abstract bool VisitChar(ReadOnlySpan<char> name, char value);
 
-    protected abstract void VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value);
+    protected abstract bool VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value);
 
-    protected abstract void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
+    protected abstract bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
 
-    protected abstract void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
+    protected abstract bool VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
 
-    protected abstract void BeginVisitLogValue(ReadOnlySpan<char> name);
+    protected abstract bool BeginVisitLogValue(ReadOnlySpan<char> name);
 
-    protected abstract void EndVisitLogValue();
+    protected abstract bool EndVisitLogValue();
 }

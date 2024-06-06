@@ -5,9 +5,10 @@ namespace NanoLog;
 
 public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessageVisitor
 {
-    protected override void VisitLiteral(ReadOnlySpan<char> chars)
+    protected override bool VisitLiteral(ReadOnlySpan<char> chars)
     {
         formatter.WriteChars(chars);
+        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -23,25 +24,27 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         }
     }
 
-    protected override void VisitNull(ReadOnlySpan<char> name)
+    protected override bool VisitNull(ReadOnlySpan<char> name)
     {
         TryWriteMemberName(name);
 
         formatter.BeforeToken(TokenType.Null);
         formatter.WriteChars("NULL");
         formatter.AfterToken(TokenType.Null);
+        return false;
     }
 
-    protected override void VisitBool(ReadOnlySpan<char> name, bool value)
+    protected override bool VisitBool(ReadOnlySpan<char> name, bool value)
     {
         TryWriteMemberName(name);
 
         formatter.BeforeToken(TokenType.Null);
         formatter.WriteChars(value ? "True" : "False");
         formatter.AfterToken(TokenType.Null);
+        return false;
     }
 
-    protected override void VisitChar(ReadOnlySpan<char> name, char value)
+    protected override bool VisitChar(ReadOnlySpan<char> name, char value)
     {
         TryWriteMemberName(name);
 
@@ -50,27 +53,30 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         formatter.WriteChars(MemoryMarshal.CreateReadOnlySpan(ref value, 1));
         formatter.WriteByte((byte)'\'');
         formatter.AfterToken(TokenType.Char);
+        return false;
     }
 
-    protected override void VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
+    protected override bool VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
     {
         TryWriteMemberName(name);
 
         formatter.BeforeToken(TokenType.Int);
         formatter.WriteFormattable(value, format);
         formatter.AfterToken(TokenType.Int);
+        return false;
     }
 
-    protected override void VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
+    protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         TryWriteMemberName(name);
 
         formatter.BeforeToken(TokenType.DateTime);
         formatter.WriteFormattable(value.ToLocalTime(), format);
         formatter.AfterToken(TokenType.DateTime);
+        return false;
     }
 
-    protected override void VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
+    protected override bool VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
     {
         TryWriteMemberName(name);
 
@@ -79,17 +85,20 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         formatter.WriteChars(value);
         formatter.WriteByte((byte)'"');
         formatter.AfterToken(TokenType.String4);
+        return false;
     }
 
-    protected override void BeginVisitLogValue(ReadOnlySpan<char> name)
+    protected override bool BeginVisitLogValue(ReadOnlySpan<char> name)
     {
         //formatter.BeforeToken(TokenType.LogValue);
         formatter.WriteByte((byte)'{');
+        return false;
     }
 
-    protected override void EndVisitLogValue()
+    protected override bool EndVisitLogValue()
     {
         formatter.WriteByte((byte)'}');
         //formatter.BeforeToken(TokenType.LogValue);
+        return false;
     }
 }

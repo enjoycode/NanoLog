@@ -5,11 +5,9 @@ namespace NanoLog.File.Viewer;
 public sealed class MainView : Toplevel
 {
     private readonly ListView _filesListView;
-    private readonly LogsTableView _logsTableView;
+    private readonly ListView _logsListView;
     private string _logsFolder = null!;
     private string _currentTheme = "Default";
-
-    private static readonly LogsTableSource EmptyTableSource = new([]);
 
     public MainView()
     {
@@ -18,11 +16,11 @@ public sealed class MainView : Toplevel
         StatusBar = BuildStatusBar();
 
         _filesListView = BuildFileListView();
-        _logsTableView = BuildLogsTableView();
+        _logsListView = BuildLogsListView();
 
         Add(MenuBar);
         Add(_filesListView);
-        Add(_logsTableView);
+        Add(_logsListView);
         Add(StatusBar);
     }
 
@@ -101,28 +99,20 @@ public sealed class MainView : Toplevel
         return listView;
     }
 
-    private LogsTableView BuildLogsTableView()
+    private ListView BuildLogsListView()
     {
-        var table = new LogsTableView()
+        return new ListView()
         {
             X = Pos.Right(_filesListView), Y = 1,
             Width = Dim.Fill(0),
             Height = Dim.Fill(1),
+            AllowsMarking = false,
+            AllowsMultipleSelection = false,
             CanFocus = true,
-            FullRowSelect = true,
-            Table = EmptyTableSource,
             Title = "Logs",
             BorderStyle = LineStyle.Single,
             SuperViewRendersLineCanvas = true
         };
-        table.Style.AlwaysShowHeaders = true;
-        table.Style.ShowHorizontalBottomline = true;
-        // table.Style.ShowHorizontalHeaderOverline = false;
-        // table.Style.ShowHorizontalHeaderUnderline = false;
-        // table.Style.ShowVerticalCellLines = false;
-        // table.Style.ShowVerticalHeaderLines = false;
-
-        return table;
     }
 
     private static void ShowAbout()
@@ -172,8 +162,8 @@ public sealed class MainView : Toplevel
             return;
         }
 
-        var tableSource = new LogsTableSource(logsReader.AllRecords);
-        _logsTableView.Table = tableSource;
+        // _logsTableView.Table = new LogsTableSource(logsReader.AllRecords);
+        _logsListView.Source = new LogsDataSource(logsReader.AllRecords);
     }
 
     #endregion
