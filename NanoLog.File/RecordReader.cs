@@ -61,16 +61,16 @@ public sealed class RecordReader : IDisposable
                 ReadTo(new Span<byte>(&line, 4));
 
                 //Message length
+                var logMessage = new LogMessage();
                 var msgLen = 0;
                 ReadTo(new Span<byte>(&msgLen, 4));
-                var innerDataLen = (msgLen >> 24) & 0xFF;
-                var outerDataLen = msgLen & 0xFFFFFF;
+                logMessage.InnerDataLength = (msgLen >> 24) & 0xFF;
+                logMessage.OuterDataLength = msgLen & 0xFFFFFF;
 
-                var logMessage = new LogMessage();
-                ReadTo(MemoryMarshal.CreateSpan(ref logMessage.InnerDataPtr, innerDataLen));
-                if (outerDataLen > 0)
+                ReadTo(MemoryMarshal.CreateSpan(ref logMessage.InnerDataPtr, logMessage.InnerDataLength));
+                if (logMessage.OuterDataLength > 0)
                 {
-                    logMessage.OuterData = ArrayPool<byte>.Shared.Rent(outerDataLen);
+                    logMessage.OuterData = ArrayPool<byte>.Shared.Rent(logMessage.OuterDataLength);
                     ReadTo(logMessage.OuterData.AsSpan());
                 }
 
