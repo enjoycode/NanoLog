@@ -4,12 +4,8 @@ namespace NanoLog.File.Viewer;
 
 public sealed class MainView : Toplevel
 {
-    private const int LeftPanelWidth = 28;
-    private readonly FrameView _leftPanel;
-    private readonly FrameView _rightPanel;
     private readonly ListView _filesListView;
     private readonly LogsTableView _logsTableView;
-
     private string _logsFolder = null!;
 
     private static readonly LogsTableSource EmptyTableSource = new([]);
@@ -21,15 +17,11 @@ public sealed class MainView : Toplevel
         StatusBar = BuildStatusBar();
 
         _filesListView = BuildFileListView();
-        _leftPanel = BuildLeftPanel();
-        _leftPanel.Add(_filesListView);
         _logsTableView = BuildLogsTableView();
-        _rightPanel = BuildRightPanel();
-        _rightPanel.Add(_logsTableView);
 
         Add(MenuBar);
-        Add(_leftPanel);
-        Add(_rightPanel);
+        Add(_filesListView);
+        Add(_logsTableView);
         Add(StatusBar);
     }
 
@@ -58,67 +50,47 @@ public sealed class MainView : Toplevel
         ]
     };
 
-    private static FrameView BuildLeftPanel()
-    {
-        var leftPanel = new FrameView()
-        {
-            Title = "Files",
-            X = 0,
-            Y = 1,
-            Width = LeftPanelWidth,
-            Height = Dim.Fill(1),
-            CanFocus = true,
-            // HotKey = Key.F.WithCtrl,
-        };
-        // leftPanel.Title = $"{leftPanel.Title} ({leftPanel.HotKey})";
-
-        return leftPanel;
-    }
-
     private ListView BuildFileListView()
     {
         var listView = new ListView()
         {
-            X = 0, Y = 0,
-            Width = Dim.Fill(0),
-            Height = Dim.Fill(0),
+            X = 0, Y = 1,
+            Width = 28,
+            Height = Dim.Fill(1),
             AllowsMarking = false,
             AllowsMultipleSelection = false,
-            CanFocus = true
+            CanFocus = true,
+            Title = "Files",
+            BorderStyle = LineStyle.Single,
+            SuperViewRendersLineCanvas = true
         };
-        listView.OpenSelectedItem += (_, _) => _rightPanel.SetFocus();
+        //listView.OpenSelectedItem += (_, _) => _logsTableView.SetFocus();
         listView.SelectedItemChanged += OnSelectedFile;
         return listView;
     }
 
-    private static FrameView BuildRightPanel()
-    {
-        var rightPane = new FrameView()
-        {
-            Title = "Logs",
-            X = LeftPanelWidth,
-            Y = 1, // for menu
-            Width = Dim.Fill(),
-            Height = Dim.Fill(1),
-            CanFocus = true,
-            // HotKey = Key.L.WithCtrl
-        };
-        // rightPane.Title = $"{rightPane.Title} ({rightPane.HotKey})";
-
-        return rightPane;
-    }
-
     private LogsTableView BuildLogsTableView()
     {
-        return new LogsTableView()
+        var table = new LogsTableView()
         {
-            X = 0, Y = 0,
+            X = Pos.Right(_filesListView), Y = 1,
             Width = Dim.Fill(0),
-            Height = Dim.Fill(0),
+            Height = Dim.Fill(1),
             CanFocus = true,
             FullRowSelect = true,
             Table = EmptyTableSource,
+            Title = "Logs",
+            BorderStyle = LineStyle.Single,
+            SuperViewRendersLineCanvas = true
         };
+        table.Style.AlwaysShowHeaders = true;
+        table.Style.ShowHorizontalBottomline = true;
+        // table.Style.ShowHorizontalHeaderOverline = false;
+        // table.Style.ShowHorizontalHeaderUnderline = false;
+        // table.Style.ShowVerticalCellLines = false;
+        // table.Style.ShowVerticalHeaderLines = false;
+
+        return table;
     }
 
     private static void ShowAbout()
