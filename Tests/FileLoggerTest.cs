@@ -33,4 +33,22 @@ public class FileLoggerTest
         //cleanup
         Directory.Delete(path, true);
     }
+
+    [TestMethod]
+    public void MakeDemoLogFiles()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "demologs");
+
+        var channel = "WebSocket";
+        var port = 12345;
+
+        NanoLogger.Start(new NanoLoggerOptions().AddLogger(new FileLogger(path)));
+        var log = new NanoLogger();
+        log.Trace("Server start...");
+        log.Debug($"Create channel: {channel}, port={port}");
+        log.Info($"Init channel: {channel}, port={port}");
+        log.Warn($"Channel port is bigger: {port}");
+        log.Error($"Server stopped: {channel}");
+        NanoLogger.Stop();
+    }
 }

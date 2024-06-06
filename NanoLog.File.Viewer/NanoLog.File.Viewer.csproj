@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="TuiLibs\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="ColorHelper">
+        <HintPath>TuiLibs\ColorHelper.dll</HintPath>
+      </Reference>
+      <Reference Include="JetBrains.Annotations">
+        <HintPath>TuiLibs\JetBrains.Annotations.dll</HintPath>
+      </Reference>
+      <Reference Include="Terminal.Gui">
+        <HintPath>TuiLibs\Terminal.Gui.dll</HintPath>
+      </Reference>
+      <Reference Include="TestableIO.System.IO.Abstractions">
+        <HintPath>TuiLibs\TestableIO.System.IO.Abstractions.dll</HintPath>
+      </Reference>
+      <Reference Include="TestableIO.System.IO.Abstractions.Wrappers">
+        <HintPath>TuiLibs\TestableIO.System.IO.Abstractions.Wrappers.dll</HintPath>
+      </Reference>
+      <Reference Include="Wcwidth">
+        <HintPath>TuiLibs\Wcwidth.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NanoLog.File\NanoLog.File.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -22,7 +22,7 @@ public sealed class RecordReader : IDisposable
     private int _pagePos;
     private int _readPos;
 
-    public IReadOnlyList<(LogEvent, LogMessage)> AllRecords => _records;
+    public List<(LogEvent, LogMessage)> AllRecords => _records;
 
     public unsafe void ReadAll()
     {
