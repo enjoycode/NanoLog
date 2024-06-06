@@ -53,7 +53,7 @@ public sealed class FileLogger : ILogger
     #region ====Files====
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string MakeFileName(ulong seq, DateTime start) => $"{seq:x16}-{start:yyMMdd-HH}";
+    private static string MakeFileName(ulong seq, DateTime start) => $"{seq:x16}-{start:yyMMdd-HH}.log";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong ParseSeqFromName(string fileName) =>
