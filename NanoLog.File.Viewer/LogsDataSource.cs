@@ -5,15 +5,20 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace NanoLog.File.Viewer;
 
-internal sealed class LogsDataSource : IListDataSource
+internal sealed class LogsDataSource : IListDataSource, IList
 {
-    public LogsDataSource(List<(LogEvent, LogMessage)> list)
+    public LogsDataSource(LogList list)
     {
         _list = list;
     }
 
-    private readonly List<(LogEvent, LogMessage)> _list;
+    private readonly LogList _list;
     private static readonly MessageRenderVisitor RenderVisitor = new();
+
+    public void CopyTo(Array array, int index)
+    {
+        throw new NotImplementedException();
+    }
 
     public int Count => _list.Count;
     public int Length => 800; //TODO:
@@ -28,9 +33,9 @@ internal sealed class LogsDataSource : IListDataSource
     {
         container.Move(Math.Max(col - start, 0), line);
 
-        var span = CollectionsMarshal.AsSpan(_list);
-        ref var logEvent = ref span[line].Item1;
-        ref var logMessage = ref span[line].Item2;
+
+        ref readonly var logEvent = ref _list.GetLogEvent(line);
+        ref readonly var logMessage = ref _list.GetLogMessage(line);
 
         //TODO: maybe use bytes buffer?
         SetColorByLevel(driver, out var current, logEvent.Level);
@@ -55,7 +60,7 @@ internal sealed class LogsDataSource : IListDataSource
 
         //Message
         RenderVisitor.Driver = driver;
-        RenderVisitor.Visit(ref logMessage);
+        RenderVisitor.Visit(in logMessage);
     }
 
     private static void WriteLevel(ConsoleDriver driver, LogLevel level)
@@ -114,5 +119,37 @@ internal sealed class LogsDataSource : IListDataSource
     {
     }
 
-    public IList ToList() => _list;
+    public IList ToList() => this;
+
+    #region ====IList====
+    //以下都不支持，仅为了适配IListDataSource返回，可提议Terminal修改IListDataSource接口
+    
+    public IEnumerator GetEnumerator() => throw new NotSupportedException();
+
+    int IList.Add(object? value) => throw new NotSupportedException();
+
+    void IList.Clear() => throw new NotSupportedException();
+
+    bool IList.Contains(object? value) => throw new NotSupportedException();
+
+    int IList.IndexOf(object? value) => throw new NotSupportedException();
+
+    void IList.Insert(int index, object? value) => throw new NotSupportedException();
+
+    void IList.Remove(object? value) => throw new NotSupportedException();
+    void IList.RemoveAt(int index) => throw new NotSupportedException();
+
+    bool IList.IsFixedSize => true;
+    bool IList.IsReadOnly => true;
+
+    public bool IsSynchronized => false;
+    public object SyncRoot => this;
+
+    public object? this[int index]
+    {
+        get => throw new NotSupportedException();
+        set => throw new NotSupportedException();
+    }
+
+    #endregion
 }

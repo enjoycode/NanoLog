@@ -8,6 +8,7 @@ public sealed class MainView : Toplevel
     private readonly ListView _logsListView;
     private string _logsFolder = null!;
     private string _currentTheme = "Light";
+    private readonly RecordReader _logsReader = new();
 
     public MainView()
     {
@@ -151,10 +152,10 @@ public sealed class MainView : Toplevel
     {
         if (e.Item < 0) return;
 
-        using var logsReader = new RecordReader(Path.Combine(_logsFolder, e.Value.ToString()!));
+        LogList list;
         try
         {
-            logsReader.ReadAll();
+            list = _logsReader.ReadLogs(Path.Combine(_logsFolder, e.Value.ToString()!));
         }
         catch (Exception ex)
         {
@@ -163,7 +164,7 @@ public sealed class MainView : Toplevel
         }
 
         // _logsTableView.Table = new LogsTableSource(logsReader.AllRecords);
-        _logsListView.Source = new LogsDataSource(logsReader.AllRecords);
+        _logsListView.Source = new LogsDataSource(list);
     }
 
     #endregion

@@ -26,9 +26,9 @@ public class FileLoggerTest
         Assert.AreEqual(1, logger.Files.Count);
 
         //read all logs
-        var reader = new RecordReader(Path.Combine(path, logger.Files[0]));
-        reader.ReadAll();
-        Assert.AreEqual(1, reader.AllRecords.Count);
+        var reader = new RecordReader();
+        var logs = reader.ReadLogs(Path.Combine(path, logger.Files[0]));
+        Assert.AreEqual(1, logs.Count);
 
         //cleanup
         Directory.Delete(path, true);
