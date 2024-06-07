@@ -3,7 +3,7 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace NanoLog.File.Viewer;
 
-internal sealed class TuiMessageVisitor : LogMessageVisitor
+internal sealed class MessageRenderVisitor : LogMessageVisitor
 {
     private ConsoleDriver _driver = null!;
     private Attribute _current;

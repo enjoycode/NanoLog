@@ -13,7 +13,7 @@ internal sealed class LogsDataSource : IListDataSource
     }
 
     private readonly List<(LogEvent, LogMessage)> _list;
-    private static readonly TuiMessageVisitor _visitor = new();
+    private static readonly MessageRenderVisitor RenderVisitor = new();
 
     public int Count => _list.Count;
     public int Length => 800; //TODO:
@@ -54,8 +54,8 @@ internal sealed class LogsDataSource : IListDataSource
         driver.SetAttribute(current);
 
         //Message
-        _visitor.Driver = driver;
-        _visitor.Visit(ref logMessage);
+        RenderVisitor.Driver = driver;
+        RenderVisitor.Visit(ref logMessage);
     }
 
     private static void WriteLevel(ConsoleDriver driver, LogLevel level)

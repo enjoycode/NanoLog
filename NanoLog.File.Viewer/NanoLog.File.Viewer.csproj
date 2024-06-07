@@ -36,4 +36,8 @@
       <ProjectReference Include="..\NanoLog.File\NanoLog.File.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.9.2" />
+    </ItemGroup>
+
 </Project>
