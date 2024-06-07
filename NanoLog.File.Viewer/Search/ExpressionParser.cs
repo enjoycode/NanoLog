@@ -157,6 +157,20 @@ public sealed class ExpressionParser : CSharpSyntaxVisitor<Expression?>
         return base.VisitIdentifierName(node);
     }
 
+    public override Expression? VisitElementAccessExpression(ElementAccessExpressionSyntax node)
+    {
+        var convertedType = GetConvertedType(node);
+        var owner = node.Expression.Accept(this)!;
+        var args = new Expression[node.ArgumentList.Arguments.Count];
+        for (var i = 0; i < node.ArgumentList.Arguments.Count; i++)
+        {
+            args[i] = node.ArgumentList.Arguments[i].Expression.Accept(this)!;
+        }
+
+        var res = Expression.Property(owner, "Item", args);
+        return convertedType == null ? res : Expression.Convert(res, convertedType);
+    }
+
     public override Expression VisitLiteralExpression(LiteralExpressionSyntax node)
     {
         var convertedType = GetConvertedType(node);
@@ -237,6 +251,8 @@ public sealed class ExpressionParser : CSharpSyntaxVisitor<Expression?>
         SyntaxKind.GreaterThanEqualsToken => ExpressionType.GreaterThanOrEqual,
         SyntaxKind.LessThanToken => ExpressionType.LessThan,
         SyntaxKind.LessThanEqualsToken => ExpressionType.LessThanOrEqual,
+        SyntaxKind.AmpersandAmpersandToken => ExpressionType.AndAlso,
+        SyntaxKind.BarBarToken => ExpressionType.OrElse,
         _ => throw new NotImplementedException($"Binary Operator: {token}")
     };
 

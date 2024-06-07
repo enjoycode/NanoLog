@@ -74,8 +74,12 @@ public sealed class LogTokenNode
         ? throw new InvalidCastException($"Can't cast {_tokenType} to DateTime")
         : (DateTime)_value!;
 
+    #region ====隐式转换(仅用于简化表达式字符串)====
+
     public static implicit operator int(LogTokenNode node) => node.ToInt();
     public static implicit operator DateTime(LogTokenNode node) => node.ToDateTime();
+
+    #endregion
 }
 
 public sealed class NoneLogValueException(string message) : Exception(message);
