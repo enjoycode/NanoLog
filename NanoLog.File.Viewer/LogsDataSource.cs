@@ -15,11 +15,6 @@ internal sealed class LogsDataSource : IListDataSource, IList
     private readonly LogList _list;
     private static readonly MessageRenderVisitor RenderVisitor = new();
 
-    public void CopyTo(Array array, int index)
-    {
-        throw new NotImplementedException();
-    }
-
     public int Count => _list.Count;
     public int Length => 800; //TODO:
 
@@ -129,6 +124,8 @@ internal sealed class LogsDataSource : IListDataSource, IList
     int IList.Add(object? value) => throw new NotSupportedException();
 
     void IList.Clear() => throw new NotSupportedException();
+
+    public void CopyTo(Array array, int index) => throw new NotSupportedException();
 
     bool IList.Contains(object? value) => throw new NotSupportedException();
 

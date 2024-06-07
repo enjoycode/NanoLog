@@ -22,8 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NanoLog.File.Viewer\NanoLog.File.Viewer.csproj" />
       <ProjectReference Include="..\NanoLog.File\NanoLog.File.csproj" />
+      <ProjectReference Include="..\NanoLog.Search\NanoLog.Search.csproj" />
       <ProjectReference Include="..\NanoLog\NanoLog.csproj" />
     </ItemGroup>
 
