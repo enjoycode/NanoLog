@@ -73,7 +73,7 @@ public sealed class FileLogger : ILogger
             _files.Add(fileName);
             return fileHandler;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return null;
         }

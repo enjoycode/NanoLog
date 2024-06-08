@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Runtime.InteropServices;
 using Terminal.Gui;
 using Attribute = Terminal.Gui.Attribute;
 
@@ -27,8 +26,7 @@ internal sealed class LogsDataSource : IListDataSource, IList
         int item, int col, int line, int width, int start = 0)
     {
         container.Move(Math.Max(col - start, 0), line);
-
-
+        
         ref readonly var logEvent = ref _list.GetLogEvent(line);
         ref readonly var logMessage = ref _list.GetLogMessage(line);
 
@@ -144,7 +142,7 @@ internal sealed class LogsDataSource : IListDataSource, IList
 
     public object? this[int index]
     {
-        get => throw new NotSupportedException();
+        get => index;
         set => throw new NotSupportedException();
     }
 

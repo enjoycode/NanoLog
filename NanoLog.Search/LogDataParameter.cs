@@ -14,12 +14,11 @@ public readonly struct LogDataParameter
         _row = row;
 
         //TODO: cache result for search again.
-        Visitor.BeforeVisit();
-        Visitor.Visit(ref CollectionsMarshal.AsSpan(_source)[_row].Item2);
-        _rootNode = Visitor.AfterVisit();
+        var visitor = new LogTokenVisitor();
+        visitor.BeforeVisit();
+        visitor.Visit(ref CollectionsMarshal.AsSpan(_source)[_row].Item2);
+        _rootNode = visitor.AfterVisit();
     }
-
-    private static readonly LogTokenVisitor Visitor = new();
 
     private readonly List<(LogEvent, LogMessage)> _source;
     private readonly LogTokenNode _rootNode;

@@ -1,4 +1,5 @@
 using Terminal.Gui;
+using Attribute = Terminal.Gui.Attribute;
 
 namespace NanoLog.File.Viewer;
 
@@ -35,6 +36,10 @@ public sealed class MainView : Toplevel
             [
                 new MenuItem("_Open", null, OnOpenFolder, null, null, KeyCode.O | KeyCode.CtrlMask),
                 new MenuItem("_Quit", null, RequestStop, null, null, KeyCode.Q | KeyCode.CtrlMask),
+            ]),
+            new MenuBarItem("_Logs",
+            [
+                new MenuItem("_Find", null, OnSearch, null, null, KeyCode.F | KeyCode.CtrlMask),
             ]),
             new MenuBarItem("_Theme", CreateThemeMenuItems()),
             new MenuBarItem("_Help",
@@ -127,11 +132,9 @@ public sealed class MainView : Toplevel
 
     private void OnOpenFolder()
     {
-        var dlg = new OpenDialog()
-        {
-            Title = "Open Logs Folder",
-            OpenMode = OpenMode.Directory
-        };
+        using var dlg = new OpenDialog();
+        dlg.Title = "Open Logs Folder";
+        dlg.OpenMode = OpenMode.Directory;
         Application.Run(dlg);
         if (dlg.Canceled)
             return;
@@ -165,6 +168,39 @@ public sealed class MainView : Toplevel
 
         // _logsTableView.Table = new LogsTableSource(logsReader.AllRecords);
         _logsListView.Source = new LogsDataSource(list);
+    }
+
+    private void OnSearch()
+    {
+        using var dlg = new Dialog();
+        dlg.Title = "Find...";
+
+        var input = new TextView()
+        {
+            X = 0, Y = 1,
+            Width = Dim.Width(dlg) - 2,
+            Height = Dim.Height(dlg) - 5,
+            CanFocus = true,
+            ColorScheme = new ColorScheme(new Attribute(Color.Black, Color.White))
+        };
+        dlg.Add(input);
+
+        var clearButton = new Button() { Title = "Clear" };
+        clearButton.Accept += (_, _) =>
+        {
+            input.Text = string.Empty;
+            input.SetFocus();
+        };
+        var cancelButton = new Button() { Title = "Cancel" };
+        cancelButton.Accept += (_, _) => Application.RequestStop();
+        var searchButton = new Button() { Title = "Search" };
+
+        dlg.AddButton(clearButton);
+        dlg.AddButton(cancelButton);
+        dlg.AddButton(searchButton);
+
+        dlg.Loaded += (_, _) => input.SetFocus();
+        Application.Run(dlg);
     }
 
     #endregion
