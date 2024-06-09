@@ -8,6 +8,7 @@ public sealed class MainView : Toplevel
     private readonly ListView _filesListView;
     private readonly ListView _logsListView;
     private string _logsFolder = null!;
+    private string _findExpression = string.Empty;
     private readonly RecordReader _logsReader = new();
 
     public MainView()
@@ -47,7 +48,7 @@ public sealed class MainView : Toplevel
             ]),
             new MenuBarItem("_Logs",
             [
-                new MenuItem("_Find", null, OnSearch, null, null, Key.CtrlMask | Key.F),
+                new MenuItem("_Find", null, ShowFindDialog, null, null, Key.CtrlMask | Key.F),
             ]),
             new MenuBarItem("_Help",
             [
@@ -200,9 +201,9 @@ public sealed class MainView : Toplevel
         _logsListView.Source = new LogsDataSource(list);
     }
 
-    private void OnSearch()
+    private void ShowFindDialog()
     {
-        using var dlg = new Dialog("Find...");
+        using var dlg = new Dialog("Find Logs");
         dlg.Width = 66;
         dlg.Height = 8;
 
@@ -221,6 +222,7 @@ public sealed class MainView : Toplevel
             X = 0, Y = 0,
             Width = Dim.Width(dlg) - 2,
             Height = Dim.Height(dlg) - 3,
+            Text = _findExpression,
             CanFocus = true,
             ColorScheme = colorScheme
         };
@@ -235,6 +237,7 @@ public sealed class MainView : Toplevel
         var cancelButton = new Button("Cancel");
         cancelButton.Clicked += () => Application.RequestStop();
         var searchButton = new Button("Search", true);
+        searchButton.Clicked += () => OnSearch(input.Text.ToString());
 
         dlg.AddButton(clearButton);
         dlg.AddButton(cancelButton);
@@ -242,6 +245,47 @@ public sealed class MainView : Toplevel
 
         dlg.Loaded += () => input.SetFocus();
         Application.Run(dlg);
+    }
+
+    private void OnSearch(string? expression)
+    {
+        var logsDataSource = (LogsDataSource)_logsListView.Source;
+        if (string.IsNullOrEmpty(expression))
+        {
+            if (logsDataSource.IsFiltered)
+                _logsListView.Source = new LogsDataSource(logsDataSource.DataSource);
+            Application.RequestStop();
+            return;
+        }
+
+        //解析编译表达式
+        try
+        {
+            var eval = ExpressionParser.ParseAndCompile(expression);
+
+            var list = logsDataSource.DataSource.Source;
+            var filtered = new List<int>();
+            for (var i = 0; i < list.Count; i++) //TODO: should parallel when large
+            {
+                var para = new LogDataParameter(list, i);
+                try
+                {
+                    if (eval(para)) filtered.Add(i);
+                }
+                catch (Exception)
+                {
+                    //Error as eval false
+                }
+            }
+
+            _logsListView.Source = new LogsDataSource(logsDataSource.DataSource, filtered);
+            _findExpression = expression;
+            Application.RequestStop();
+        }
+        catch (Exception e)
+        {
+            MessageBox.ErrorQuery("Expression Error", e.Message, "_Ok");
+        }
     }
 
     #endregion

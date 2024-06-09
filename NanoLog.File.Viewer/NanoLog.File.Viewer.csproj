@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\NanoLog.File\NanoLog.File.csproj" />
+      <ProjectReference Include="..\NanoLog.Search\NanoLog.Search.csproj" />
     </ItemGroup>
 
     <ItemGroup>

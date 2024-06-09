@@ -8,13 +8,22 @@ internal sealed class LogsDataSource : IListDataSource, IList
 {
     public LogsDataSource(LogList list)
     {
-        _list = list;
+        DataSource = list;
     }
 
-    private readonly LogList _list;
+    public LogsDataSource(LogList list, List<int> filtered)
+    {
+        DataSource = list;
+        _filtered = filtered;
+    }
+
+    public readonly LogList DataSource;
+    private readonly List<int>? _filtered;
     private static readonly MessageRenderVisitor RenderVisitor = new();
 
-    public int Count => _list.Count;
+    public bool IsFiltered => _filtered != null;
+
+    public int Count => _filtered?.Count ?? DataSource.Count;
     public int Length => 800; //TODO:
 
     public bool IsMarked(int item)
@@ -26,9 +35,10 @@ internal sealed class LogsDataSource : IListDataSource, IList
         int item, int col, int line, int width, int start = 0)
     {
         container.Move(Math.Max(col - start, 0), line);
-        
-        ref readonly var logEvent = ref _list.GetLogEvent(item);
-        ref readonly var logMessage = ref _list.GetLogMessage(item);
+
+        var rowIndex = _filtered == null ? item : _filtered[item];
+        ref readonly var logEvent = ref DataSource.GetLogEvent(rowIndex);
+        ref readonly var logMessage = ref DataSource.GetLogMessage(rowIndex);
 
         //TODO: maybe use bytes buffer?
         SetColorByLevel(driver, out var current, logEvent.Level);
@@ -77,6 +87,9 @@ internal sealed class LogsDataSource : IListDataSource, IList
                 break;
             case LogLevel.Fatal:
                 driver.AddRune('F');
+                break;
+            default:
+                driver.AddRune('U');
                 break;
         }
     }
