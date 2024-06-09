@@ -12,7 +12,7 @@ internal sealed class RecordWriter(FileLogger logger)
     private int _writePos;
     private int _headerPos;
 
-    private int PageAvailable => FileLogger.PAGE_SIZE - _pagePos;
+    private int PageAvailable => FileLogger.PAGE_SIZE - _writePos;
 
     private ref RecordHeader HeaderPtr => ref Unsafe.As<byte, RecordHeader>(
         ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_buffer), _headerPos));
