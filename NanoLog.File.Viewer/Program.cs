@@ -2,7 +2,5 @@
 using Terminal.Gui;
 
 Application.Init();
-ConfigurationManager.Themes!.Theme = "Light";
-ConfigurationManager.Apply();
-Application.Run<MainView>().Dispose();
+Application.Run<MainView>();
 Application.Shutdown();

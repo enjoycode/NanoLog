@@ -8,11 +8,12 @@ public sealed class MainView : Toplevel
     private readonly ListView _filesListView;
     private readonly ListView _logsListView;
     private string _logsFolder = null!;
-    private string _currentTheme = "Light";
     private readonly RecordReader _logsReader = new();
 
     public MainView()
     {
+        ReplaceKeyBinding(Key.CtrlMask | Key.F, Key.CtrlMask | Key.N);
+
         ColorScheme = Colors.ColorSchemes["Base"];
         MenuBar = BuildMenuBar();
         StatusBar = BuildStatusBar();
@@ -20,9 +21,14 @@ public sealed class MainView : Toplevel
         _filesListView = BuildFileListView();
         _logsListView = BuildLogsListView();
 
+        var letPanel = BuildLeftPanel();
+        letPanel.Add(_filesListView);
+        var rightPanel = BuildRightPanel(letPanel);
+        rightPanel.Add(_logsListView);
+
         Add(MenuBar);
-        Add(_filesListView);
-        Add(_logsListView);
+        Add(letPanel);
+        Add(rightPanel);
         Add(StatusBar);
     }
 
@@ -34,14 +40,13 @@ public sealed class MainView : Toplevel
         [
             new MenuBarItem("_File",
             [
-                new MenuItem("_Open", null, OnOpenFolder, null, null, KeyCode.O | KeyCode.CtrlMask),
-                new MenuItem("_Quit", null, RequestStop, null, null, KeyCode.Q | KeyCode.CtrlMask),
+                new MenuItem("_Open", null, OnOpenFolder, null, null, Key.CtrlMask | Key.O),
+                new MenuItem("_Quit", null, RequestStop, null, null, Key.CtrlMask | Key.Q),
             ]),
             new MenuBarItem("_Logs",
             [
-                new MenuItem("_Find", null, OnSearch, null, null, KeyCode.F | KeyCode.CtrlMask),
+                new MenuItem("_Find", null, OnSearch, null, null, Key.CtrlMask | Key.F),
             ]),
-            new MenuBarItem("_Theme", CreateThemeMenuItems()),
             new MenuBarItem("_Help",
             [
                 new MenuItem("_About...", null, ShowAbout, null, null)
@@ -49,77 +54,68 @@ public sealed class MainView : Toplevel
         ]
     };
 
-    private MenuItem[] CreateThemeMenuItems()
-    {
-        var items = new List<MenuItem>();
-        var schemeCount = 0;
-        foreach (var theme in ConfigurationManager.Themes!)
-        {
-            var item = new MenuItem
-            {
-                Title = $"_{theme.Key}",
-                Shortcut = (KeyCode)new Key((KeyCode)((uint)KeyCode.D1 + schemeCount++)).WithCtrl
-            };
-            item.CheckType |= MenuItemCheckStyle.Checked;
-            item.Checked = theme.Key == _currentTheme;
-
-            item.Action += () =>
-            {
-                ConfigurationManager.Themes.Theme = _currentTheme = theme.Key;
-                items.ForEach(m => m.Checked = false);
-                item.Checked = true;
-                ConfigurationManager.Apply();
-                Application.Top.SetNeedsDisplay();
-            };
-            items.Add(item);
-        }
-
-        return items.ToArray();
-    }
-
     private static StatusBar BuildStatusBar() => new()
     {
         Visible = true,
         Items =
         [
-            new StatusItem(KeyCode.CharMask, "enjoycode@icloud.com", null)
+            new StatusItem(Key.CharMask, "enjoycode@icloud.com", null)
         ]
     };
+
+    private static FrameView BuildLeftPanel()
+    {
+        var panel = new FrameView
+        {
+            X = 0, Y = 1, Width = 28, Height = Dim.Fill(1),
+            CanFocus = true,
+            Title = "Files",
+            Shortcut = Key.CtrlMask | Key.D
+        };
+        panel.Title = $"{panel.Title} ({panel.ShortcutTag})";
+        panel.ShortcutAction = () => panel.SetFocus();
+        return panel;
+    }
+
+    private static FrameView BuildRightPanel(FrameView leftPanel)
+    {
+        var panel = new FrameView
+        {
+            X = Pos.Right(leftPanel), Y = 1, Width = Dim.Fill(0), Height = Dim.Fill(1),
+            CanFocus = true,
+            Title = "Logs",
+            Shortcut = Key.CtrlMask | Key.L
+        };
+        panel.Title = $"{panel.Title} ({panel.ShortcutTag})";
+        panel.ShortcutAction = () => panel.SetFocus();
+        return panel;
+    }
 
     private ListView BuildFileListView()
     {
         var listView = new ListView()
         {
-            X = 0, Y = 1,
-            Width = 28,
-            Height = Dim.Fill(1),
+            X = 0, Y = 0,
+            Width = Dim.Fill(0),
+            Height = Dim.Fill(0),
             AllowsMarking = false,
             AllowsMultipleSelection = false,
             CanFocus = true,
-            Title = "Files",
-            BorderStyle = LineStyle.Single,
-            SuperViewRendersLineCanvas = true
         };
         //listView.OpenSelectedItem += (_, _) => _logsTableView.SetFocus();
         listView.SelectedItemChanged += OnSelectedFile;
         return listView;
     }
 
-    private ListView BuildLogsListView()
+    private static ListView BuildLogsListView() => new()
     {
-        return new ListView()
-        {
-            X = Pos.Right(_filesListView), Y = 1,
-            Width = Dim.Fill(0),
-            Height = Dim.Fill(1),
-            AllowsMarking = false,
-            AllowsMultipleSelection = false,
-            CanFocus = true,
-            Title = "Logs",
-            BorderStyle = LineStyle.Single,
-            SuperViewRendersLineCanvas = true
-        };
-    }
+        X = 0, Y = 0,
+        Width = Dim.Fill(0),
+        Height = Dim.Fill(0),
+        AllowsMarking = false,
+        AllowsMultipleSelection = false,
+        CanFocus = true,
+    };
 
     private static void ShowAbout()
     {
@@ -132,9 +128,7 @@ public sealed class MainView : Toplevel
 
     private void OnOpenFolder()
     {
-        using var dlg = new OpenDialog();
-        dlg.Title = "Open Logs Folder";
-        dlg.OpenMode = OpenMode.Directory;
+        using var dlg = new OpenDialog("Open Logs Folder", null, null, OpenDialog.OpenMode.Directory);
         Application.Run(dlg);
         if (dlg.Canceled)
             return;
@@ -151,7 +145,7 @@ public sealed class MainView : Toplevel
             _filesListView.SelectedItem = 0;
     }
 
-    private void OnSelectedFile(object? sender, ListViewItemEventArgs e)
+    private void OnSelectedFile(ListViewItemEventArgs e)
     {
         if (e.Item < 0) return;
 
@@ -172,34 +166,45 @@ public sealed class MainView : Toplevel
 
     private void OnSearch()
     {
-        using var dlg = new Dialog();
-        dlg.Title = "Find...";
+        using var dlg = new Dialog("Find...");
+        dlg.Width = 66;
+        dlg.Height = 8;
+
+        var attribute = Attribute.Make(Color.Black, Color.White);
+        var colorScheme = new ColorScheme
+        {
+            Normal = attribute,
+            Focus = attribute,
+            HotNormal = attribute,
+            HotFocus = attribute,
+            Disabled = attribute
+        };
 
         var input = new TextView()
         {
-            X = 0, Y = 1,
+            X = 0, Y = 0,
             Width = Dim.Width(dlg) - 2,
-            Height = Dim.Height(dlg) - 5,
+            Height = Dim.Height(dlg) - 3,
             CanFocus = true,
-            ColorScheme = new ColorScheme(new Attribute(Color.Black, Color.White))
+            ColorScheme = colorScheme
         };
         dlg.Add(input);
 
-        var clearButton = new Button() { Title = "Clear" };
-        clearButton.Accept += (_, _) =>
+        var clearButton = new Button("Clear");
+        clearButton.Clicked += () =>
         {
             input.Text = string.Empty;
             input.SetFocus();
         };
-        var cancelButton = new Button() { Title = "Cancel" };
-        cancelButton.Accept += (_, _) => Application.RequestStop();
-        var searchButton = new Button() { Title = "Search" };
+        var cancelButton = new Button("Cancel");
+        cancelButton.Clicked += () => Application.RequestStop();
+        var searchButton = new Button("Search", true);
 
         dlg.AddButton(clearButton);
         dlg.AddButton(cancelButton);
         dlg.AddButton(searchButton);
 
-        dlg.Loaded += (_, _) => input.SetFocus();
+        dlg.Loaded += () => input.SetFocus();
         Application.Run(dlg);
     }
 

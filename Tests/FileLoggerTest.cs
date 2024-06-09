@@ -1,3 +1,4 @@
+using ConsoleDemo;
 using NanoLog;
 using NanoLog.File;
 
@@ -39,8 +40,8 @@ public class FileLoggerTest
     {
         var path = Path.Combine(Path.GetTempPath(), "demologs");
 
-        var channel = "WebSocket";
-        var port = 12345;
+        const string channel = "WebSocket";
+        const int port = 12345;
 
         NanoLogger.Start(new NanoLoggerOptions().AddLogger(new FileLogger(path)));
         var log = new NanoLogger();
@@ -49,6 +50,12 @@ public class FileLoggerTest
         log.Info($"Init channel: {channel}, port={port}");
         log.Warn($"Channel port is bigger: {port}");
         log.Error($"Server stopped: {channel}");
+        for (var i = 0; i < 1000; i++)
+        {
+            var point = new Point() { X = i, Y = i };
+            log.Debug($"Structured point: {point}");
+        }
+
         NanoLogger.Stop();
     }
 }

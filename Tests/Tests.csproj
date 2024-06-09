@@ -27,4 +27,10 @@
       <ProjectReference Include="..\NanoLog\NanoLog.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Include="..\ConsoleDemo\Point.cs">
+        <Link>Point.cs</Link>
+      </Compile>
+    </ItemGroup>
+
 </Project>
