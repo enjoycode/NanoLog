@@ -18,8 +18,17 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
         }
     }
 
-    private void BeforeToken()
+    private void BeforeToken(ReadOnlySpan<char> name)
     {
+        if (IsLogValueMember)
+        {
+            if (!IsFirstMember)
+                Driver.AddChars(", ");
+
+            Driver.AddChars(name);
+            Driver.AddChars(": ");
+        }
+        
         Driver.SetAttribute(Driver.MakeColor(Color.Magenta, _current.Background));
     }
 
@@ -36,7 +45,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
 
     protected override bool VisitNull(ReadOnlySpan<char> name)
     {
-        BeforeToken();
+        BeforeToken(name);
         Driver.AddStr("NULL");
         AfterToken();
         return false;
@@ -44,7 +53,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
 
     protected override bool VisitBool(ReadOnlySpan<char> name, bool value)
     {
-        BeforeToken();
+        BeforeToken(name);
         Driver.AddStr(value ? "True" : "False");
         AfterToken();
         return false;
@@ -52,7 +61,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
 
     protected override bool VisitChar(ReadOnlySpan<char> name, char value)
     {
-        BeforeToken();
+        BeforeToken(name);
         Driver.AddRune('\'');
         Driver.AddRune(value);
         Driver.AddRune('\'');
@@ -62,7 +71,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
 
     protected override bool VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value)
     {
-        BeforeToken();
+        BeforeToken(name);
         Driver.AddStr(value.ToString());
         AfterToken();
         return false;
@@ -70,7 +79,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
 
     protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
-        BeforeToken();
+        BeforeToken(name);
         Driver.AddStr(value.ToString("yyyy-MM-dd HH:mm:ss"));
         AfterToken();
         return false;
@@ -78,7 +87,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
 
     protected override bool VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value)
     {
-        BeforeToken();
+        BeforeToken(name);
         Driver.AddRune('"');
         Driver.AddChars(value);
         Driver.AddRune('"');

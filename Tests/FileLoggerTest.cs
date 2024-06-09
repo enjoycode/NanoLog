@@ -53,7 +53,7 @@ public class FileLoggerTest
         for (var i = 0; i < 1000; i++)
         {
             var point = new Point() { X = i, Y = i };
-            log.Debug($"Structured point: {point}");
+            log.Info($"Structured point: {point}");
         }
 
         NanoLogger.Stop();

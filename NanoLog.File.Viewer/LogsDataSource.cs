@@ -35,7 +35,7 @@ internal sealed class LogsDataSource : IListDataSource, IList
         driver.AddRune('[');
         WriteLevel(driver, logEvent.Level);
         //Timestamp
-        driver.AddStr(logEvent.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff"));
+        driver.AddStr(logEvent.Time.ToLocalTime().ToString("HH:mm:ss.fff"));
 
         //File
         driver.AddRune(' ');
