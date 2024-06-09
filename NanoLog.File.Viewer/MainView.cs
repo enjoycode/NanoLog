@@ -203,6 +203,8 @@ public sealed class MainView : Toplevel
 
     private void ShowFindDialog()
     {
+        if (_logsListView.Source == null || _logsListView.Source.Count == 0) return;
+
         using var dlg = new Dialog("Find Logs");
         dlg.Width = 66;
         dlg.Height = 8;
@@ -253,7 +255,11 @@ public sealed class MainView : Toplevel
         if (string.IsNullOrEmpty(expression))
         {
             if (logsDataSource.IsFiltered)
+            {
                 _logsListView.Source = new LogsDataSource(logsDataSource.DataSource);
+                _findExpression = string.Empty;
+            }
+
             Application.RequestStop();
             return;
         }
