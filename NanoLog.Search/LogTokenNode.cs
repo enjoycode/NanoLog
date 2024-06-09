@@ -56,6 +56,14 @@ public sealed class LogTokenNode
     public bool IsNotNull => _tokenType != TokenType.Null && _value != null;
     public object? Value => _value;
 
+    public byte ToByte() => _tokenType == TokenType.Byte
+        ? (byte)_value!
+        : throw new InvalidCastException($"Can't cast {_tokenType} to DateTime");
+
+    public char ToChar() => _tokenType == TokenType.Char
+        ? (char)_value!
+        : throw new InvalidCastException($"Can't cast {_tokenType} to DateTime");
+
     public int ToInt() => _tokenType switch
     {
         TokenType.Byte => (byte)_value!,
@@ -63,21 +71,51 @@ public sealed class LogTokenNode
         TokenType.Short => (short)_value!,
         TokenType.UShort => (ushort)_value!,
         TokenType.Int => (int)_value!,
+        TokenType.UInt => (int)(uint)_value!,
         TokenType.Long => (int)(long)_value!,
+        TokenType.ULong => (int)(ulong)_value!,
         TokenType.Float => (int)(float)_value!,
         TokenType.Double => (int)(double)_value!,
         TokenType.Decimal => (int)(decimal)_value!,
         _ => throw new InvalidCastException($"Can't cast {_tokenType} to Int32")
     };
 
-    public DateTime ToDateTime() => _tokenType != TokenType.DateTime
-        ? throw new InvalidCastException($"Can't cast {_tokenType} to DateTime")
-        : (DateTime)_value!;
+    public double ToDouble() => _tokenType switch
+    {
+        TokenType.Byte => (byte)_value!,
+        TokenType.Char => (char)_value!,
+        TokenType.Short => (short)_value!,
+        TokenType.UShort => (ushort)_value!,
+        TokenType.Int => (int)_value!,
+        TokenType.UInt => (uint)_value!,
+        TokenType.Long => (long)_value!,
+        TokenType.ULong => (ulong)_value!,
+        TokenType.Float => (float)_value!,
+        TokenType.Double => (double)_value!,
+        TokenType.Decimal => (double)(decimal)_value!,
+        _ => throw new InvalidCastException($"Can't cast {_tokenType} to Double")
+    };
+
+    public DateTime ToDateTime() => _tokenType == TokenType.DateTime
+        ? (DateTime)_value!
+        : throw new InvalidCastException($"Can't cast {_tokenType} to DateTime");
+
+    public Guid ToGuid() => _tokenType == TokenType.Guid
+        ? (Guid)_value!
+        : throw new InvalidCastException($"Can't cast {_tokenType} to Guid");
+    
+    public string ToStringValue() => _tokenType is TokenType.String1 or TokenType.String2 or TokenType.String4
+        ? (string)_value!
+        : throw new InvalidCastException($"Can't cast {_tokenType} to String");
 
     #region ====隐式转换(仅用于简化表达式字符串)====
 
+    public static implicit operator byte(LogTokenNode node) => node.ToByte();
+    public static implicit operator char(LogTokenNode node) => node.ToChar();
     public static implicit operator int(LogTokenNode node) => node.ToInt();
+    public static implicit operator double(LogTokenNode node) => node.ToDouble();
     public static implicit operator DateTime(LogTokenNode node) => node.ToDateTime();
+    public static implicit operator Guid(LogTokenNode node) => node.ToGuid();
 
     #endregion
 }

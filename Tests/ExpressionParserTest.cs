@@ -37,6 +37,7 @@ public class ExpressionParserTest
         var list = new List<(LogEvent, LogMessage)> { (logEvent, writer.Message) };
         var para = new LogDataParameter(list, 0);
 
+        Assert.IsTrue(Eval("e.Time > new DateTime(1977,01,01)", para));
         Assert.IsTrue(Eval("e.Level >= LogLevel.Debug && e.File.Contains(\"a\")", para));
         Assert.IsFalse(Eval("e[\"value\"]==12345", para)); //不存在的属性
         Assert.IsTrue(Eval("e.Level >= LogLevel.Debug && e[\"index\"]==12345", para, false));
