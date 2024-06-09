@@ -27,8 +27,8 @@ internal sealed class LogsDataSource : IListDataSource, IList
     {
         container.Move(Math.Max(col - start, 0), line);
         
-        ref readonly var logEvent = ref _list.GetLogEvent(line);
-        ref readonly var logMessage = ref _list.GetLogMessage(line);
+        ref readonly var logEvent = ref _list.GetLogEvent(item);
+        ref readonly var logMessage = ref _list.GetLogMessage(item);
 
         //TODO: maybe use bytes buffer?
         SetColorByLevel(driver, out var current, logEvent.Level);

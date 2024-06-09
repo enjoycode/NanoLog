@@ -26,6 +26,8 @@ public sealed class MainView : Toplevel
         var rightPanel = BuildRightPanel(letPanel);
         rightPanel.Add(_logsListView);
 
+        // BuildLogsScrollBar(_logsListView);
+
         Add(MenuBar);
         Add(letPanel);
         Add(rightPanel);
@@ -107,15 +109,49 @@ public sealed class MainView : Toplevel
         return listView;
     }
 
-    private static ListView BuildLogsListView() => new()
+    private static ListView BuildLogsListView()
     {
-        X = 0, Y = 0,
-        Width = Dim.Fill(0),
-        Height = Dim.Fill(0),
-        AllowsMarking = false,
-        AllowsMultipleSelection = false,
-        CanFocus = true,
-    };
+        var listView = new ListView
+        {
+            X = 0, Y = 0,
+            Width = Dim.Fill(0),
+            Height = Dim.Fill(0),
+            AllowsMarking = false,
+            AllowsMultipleSelection = false,
+            CanFocus = true,
+        };
+
+        return listView;
+    }
+
+    // private static ScrollBarView BuildLogsScrollBar(ListView listView)
+    // {
+    //     var scrollBar = new ScrollBarView(listView, true);
+    //     scrollBar.ChangedPosition += () =>
+    //     {
+    //         listView.TopItem = scrollBar.Position;
+    //         if (listView.TopItem != scrollBar.Position)
+    //             scrollBar.Position = listView.TopItem;
+    //         listView.SetNeedsDisplay();
+    //     };
+    //     scrollBar.OtherScrollBarView.ChangedPosition += () =>
+    //     {
+    //         listView.LeftItem = scrollBar.OtherScrollBarView.Position;
+    //         if (listView.LeftItem != scrollBar.OtherScrollBarView.Position)
+    //             scrollBar.OtherScrollBarView.Position = listView.LeftItem;
+    //         listView.SetNeedsDisplay();
+    //     };
+    //
+    //     listView.DrawContent += _ =>
+    //     {
+    //         scrollBar.Size = listView.Source.Count;
+    //         scrollBar.Position = listView.TopItem;
+    //         scrollBar.OtherScrollBarView.Size = listView.Maxlength;
+    //         scrollBar.OtherScrollBarView.Position = listView.LeftItem;
+    //         scrollBar.Refresh();
+    //     };
+    //     return scrollBar;
+    // }
 
     private static void ShowAbout()
     {
