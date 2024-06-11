@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace NanoLog;
 
-public sealed class NanoLogger
+public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel = LogLevel.Information)
 {
     #region ====Static Methods====
 
@@ -28,17 +28,18 @@ public sealed class NanoLogger
 
     #endregion
 
-    private readonly string _categoryName;
-
-    public NanoLogger(string? categoryName = null)
-    {
-        _categoryName = categoryName ?? "";
-    }
+    private int _version = -1;
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        //TODO:
-        return true;
+        if (Options.Version != _version)
+        {
+            _version = Options.Version;
+            if (Options.TryGetFilter(categoryName, out var level))
+                minimumLevel = level;
+        }
+
+        return logLevel >= minimumLevel;
     }
 
     #region ====Log Methods====
@@ -51,7 +52,7 @@ public sealed class NanoLogger
         var builder = new LogMessageBuilder<TraceLevel>();
         builder.AppendLiteral(message);
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Trace, _categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -61,7 +62,7 @@ public sealed class NanoLogger
         if (!builder.IsEnabled) return;
 
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Trace, _categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -71,7 +72,7 @@ public sealed class NanoLogger
         if (!builder.IsEnabled) return;
 
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Debug, _categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Debug, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -81,7 +82,7 @@ public sealed class NanoLogger
         if (!builder.IsEnabled) return;
 
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Information, _categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Information, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -91,7 +92,7 @@ public sealed class NanoLogger
         if (!builder.IsEnabled) return;
 
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Warning, _categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Warning, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -101,7 +102,7 @@ public sealed class NanoLogger
         if (!builder.IsEnabled) return;
 
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Error, _categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Error, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
