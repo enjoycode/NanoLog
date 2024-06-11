@@ -1,3 +1,4 @@
+using System.Globalization;
 using Terminal.Gui;
 using Attribute = Terminal.Gui.Attribute;
 
@@ -28,7 +29,7 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
             Driver.AddChars(name);
             Driver.AddChars(": ");
         }
-        
+
         Driver.SetAttribute(Driver.MakeColor(Color.Magenta, _current.Background));
     }
 
@@ -77,10 +78,26 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
+    {
+        BeforeToken(name);
+        Driver.AddStr(value.ToString(CultureInfo.InvariantCulture));
+        AfterToken();
+        return false;
+    }
+
     protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         BeforeToken(name);
         Driver.AddStr(value.ToString("yyyy-MM-dd HH:mm:ss"));
+        AfterToken();
+        return false;
+    }
+
+    protected override bool VisitGuid(ReadOnlySpan<char> name, Guid value)
+    {
+        BeforeToken(name);
+        Driver.AddStr(value.ToString());
         AfterToken();
         return false;
     }

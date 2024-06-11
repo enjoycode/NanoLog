@@ -34,9 +34,21 @@ public sealed class LogMessageDump : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
+    {
+        Console.WriteLine($"Double: Name=\"{name}\" Format=\"{format}\" Value={value}");
+        return false;
+    }
+
     protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         Console.WriteLine($"DateTime: Name=\"{name}\" Format=\"{format}\" Value={value.ToLocalTime()}");
+        return false;
+    }
+
+    protected override bool VisitGuid(ReadOnlySpan<char> name, Guid value)
+    {
+        Console.WriteLine($"{name}={value}");
         return false;
     }
 

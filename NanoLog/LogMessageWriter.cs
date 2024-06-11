@@ -68,6 +68,17 @@ public unsafe ref struct LogMessageWriter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void WriteShort(short v)
+    {
+        EnsureAvailable(2);
+        var ptr = (byte*)&v;
+        var dest = WriteSpan[_pos..];
+        dest[0] = ptr[0];
+        dest[1] = ptr[1];
+        _pos += 2;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void WriteUShort(ushort v)
     {
         EnsureAvailable(2);
@@ -162,6 +173,19 @@ public unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
+    public void AppendShort(string name, short? v)
+    {
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.Short);
+            WriteShortString(name);
+            WriteShort((short)v);
+            return;
+        }
+
+        AppendNull(name);
+    }
+
     public void AppendInt(string name, int? v, string? format = null)
     {
         if (v.HasValue)
@@ -177,6 +201,21 @@ public unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
+    public void AppendDouble(string name, double? v, string? format = null)
+    {
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.Double);
+            WriteShortString(name);
+            WriteShortString(format);
+            var value = v.Value;
+            Write(new ReadOnlySpan<byte>((byte*)&value, 8));
+            return;
+        }
+
+        AppendNull(name);
+    }
+
     public void AppendDateTime(string name, DateTime? v, string? format = null)
     {
         if (v.HasValue)
@@ -186,6 +225,22 @@ public unsafe ref struct LogMessageWriter
             WriteShortString(format);
             var ticks = v.Value.ToUniversalTime().Ticks;
             Write(new ReadOnlySpan<byte>((byte*)&ticks, 8));
+            return;
+        }
+
+        AppendNull(name);
+    }
+
+    public void AppendGuid(string name, Guid? v, string? format = null)
+    {
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.Guid);
+            WriteShortString(name);
+            WriteShortString(format);
+            var bytes = stackalloc byte[16];
+            v.Value.TryWriteBytes(new Span<byte>(bytes, 16));
+            Write(new ReadOnlySpan<byte>(bytes, 16));
             return;
         }
 

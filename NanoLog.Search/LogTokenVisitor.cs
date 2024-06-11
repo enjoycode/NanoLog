@@ -20,7 +20,7 @@ public sealed class LogTokenVisitor : LogMessageVisitor
         _root = _current = null!;
         return res;
     }
-    
+
     protected override bool VisitLiteral(ReadOnlySpan<char> chars) => false;
 
     protected override bool VisitNull(ReadOnlySpan<char> name)
@@ -48,9 +48,21 @@ public sealed class LogTokenVisitor : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
+    {
+        _current.TryAddChild(name.ToString(), new LogTokenNode(_current, TokenType.Double, value));
+        return false;
+    }
+
     protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         _current.TryAddChild(name.ToString(), new LogTokenNode(_current, TokenType.DateTime, value));
+        return false;
+    }
+
+    protected override bool VisitGuid(ReadOnlySpan<char> name, Guid value)
+    {
+        _current.TryAddChild(name.ToString(), new LogTokenNode(_current, TokenType.Guid, value));
         return false;
     }
 

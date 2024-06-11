@@ -100,6 +100,14 @@ public abstract unsafe class LogMessageVisitor
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private double ReadDouble()
+    {
+        var res = 0.0d;
+        ReadTo(new Span<byte>(&res, 8));
+        return res;
+    }
+
     /// <summary>
     /// Read DateTime(UTC) value
     /// </summary>
@@ -108,6 +116,14 @@ public abstract unsafe class LogMessageVisitor
     {
         var ticks = ReadLong();
         return new DateTime(ticks, DateTimeKind.Utc);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Guid ReadGuid()
+    {
+        var bytes = stackalloc byte[16];
+        ReadTo(new Span<byte>(bytes, 16));
+        return new Guid(new ReadOnlySpan<byte>(bytes, 16));
     }
 
     #endregion
@@ -146,7 +162,7 @@ public abstract unsafe class LogMessageVisitor
                     _firstMember = false;
                     break;
                 case TokenType.BoolTrue:
-                    if(VisitBool(ReadShortString(), true))
+                    if (VisitBool(ReadShortString(), true))
                         return;
                     _firstMember = false;
                     break;
@@ -165,8 +181,18 @@ public abstract unsafe class LogMessageVisitor
                         return;
                     _firstMember = false;
                     break;
+                case TokenType.Double:
+                    if (VisitDouble(ReadShortString(), ReadShortString(), ReadDouble()))
+                        return;
+                    _firstMember = false;
+                    break;
                 case TokenType.DateTime:
                     if (VisitDateTime(ReadShortString(), ReadShortString(), ReadDateTime()))
+                        return;
+                    _firstMember = false;
+                    break;
+                case TokenType.Guid:
+                    if (VisitGuid(ReadShortString(), ReadGuid()))
                         return;
                     _firstMember = false;
                     break;
@@ -215,7 +241,11 @@ public abstract unsafe class LogMessageVisitor
 
     protected abstract bool VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value);
 
+    protected abstract bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value);
+
     protected abstract bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value);
+
+    protected abstract bool VisitGuid(ReadOnlySpan<char> name, Guid value);
 
     protected abstract bool VisitString(ReadOnlySpan<char> name, ReadOnlySpan<char> value);
 

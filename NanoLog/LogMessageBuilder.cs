@@ -38,16 +38,32 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
         _writer.AppendChar(name, value);
     }
 
+    public void AppendFormatted(short? value, [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendShort(name, value);
+    }
+
     public void AppendFormatted(int? value, string? format = null,
         [CallerArgumentExpression("value")] string name = "")
     {
         _writer.AppendInt(name, value, format);
     }
 
+    public void AppendFormatted(double? value, string? format = null,
+        [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendDouble(name, value, format);
+    }
+
     public void AppendFormatted(DateTime? value, string? format = null,
         [CallerArgumentExpression("value")] string name = "")
     {
         _writer.AppendDateTime(name, value, format);
+    }
+
+    public void AppendFormatted(Guid? value, [CallerArgumentExpression("value")] string name = "")
+    {
+        _writer.AppendGuid(name, value);
     }
 
     public void AppendFormatted(string? value, [CallerArgumentExpression("value")] string name = "")
@@ -74,10 +90,23 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
         _writer.AppendNull(name);
     }
 
-    // public void AppendFormatted(object? value, [CallerArgumentExpression("value")] string name = "")
-    // {
-    //     
-    // }
+    public void AppendFormatted(object? value, [CallerArgumentExpression("value")] string name = "")
+    {
+        if (value == null)
+        {
+            _writer.AppendNull(name);
+            return;
+        }
+
+        if (value is ILogValue logValue)
+        {
+            _writer.AppendLogValue(name, logValue);
+            return;
+        }
+
+        //TODO: ToString() now.
+        _writer.AppendString(name, value.ToString());
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void FinishWrite() => _writer.FinishWrite();

@@ -66,6 +66,16 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         return false;
     }
 
+    protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
+    {
+        TryWriteMemberName(name);
+
+        formatter.BeforeToken(TokenType.Double);
+        formatter.WriteFormattable(value, format);
+        formatter.AfterToken(TokenType.Double);
+        return false;
+    }
+
     protected override bool VisitDateTime(ReadOnlySpan<char> name, ReadOnlySpan<char> format, DateTime value)
     {
         TryWriteMemberName(name);
@@ -73,6 +83,16 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         formatter.BeforeToken(TokenType.DateTime);
         formatter.WriteFormattable(value.ToLocalTime(), format);
         formatter.AfterToken(TokenType.DateTime);
+        return false;
+    }
+
+    protected override bool VisitGuid(ReadOnlySpan<char> name, Guid value)
+    {
+        TryWriteMemberName(name);
+
+        formatter.BeforeToken(TokenType.Guid);
+        formatter.WriteFormattable(value);
+        formatter.AfterToken(TokenType.Guid);
         return false;
     }
 
