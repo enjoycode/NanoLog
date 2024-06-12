@@ -17,7 +17,7 @@ public sealed class DefaultConsoleFormatter : ConsoleFormatter
     private static readonly byte[] Magenta = [0x1B, 0x5B, 0x33, 0x35, 0x6D];
     private static readonly byte[] Reset = [0x1B, 0x5B, 0x30, 0x6D];
 
-    private static char GetLevelChar(LogLevel level) => level switch
+    internal static char GetLevelChar(LogLevel level) => level switch
     {
         LogLevel.Trace => 'T',
         LogLevel.Debug => 'D',
