@@ -16,7 +16,7 @@ public sealed class UnitTestConsoleLogger : ILogger
         Console.Out.Write(DefaultConsoleFormatter.GetLevelChar(logEvent.Level));
         Console.Out.Write(_dateTimeBuffer.AsSpan(0, charsWritten));
         Console.Out.Write(' ');
-        Console.Out.Write(logEvent.File);
+        Console.Out.Write(Path.GetFileName(logEvent.File));
         Console.Out.Write(' ');
         Console.Out.Write(logEvent.Member);
         Console.Out.Write(':');
