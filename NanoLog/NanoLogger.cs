@@ -66,6 +66,18 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
+    public void Debug(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
+        [CallerLineNumber] int line = 0)
+    {
+        if (!IsEnabled(LogLevel.Trace)) return;
+
+        var builder = new LogMessageBuilder<DebugLevel>();
+        builder.AppendLiteral(message);
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
     public void Debug([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<DebugLevel> builder,
         [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
     {
@@ -73,6 +85,18 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
 
         builder.FinishWrite();
         var logEvent = new LogEvent(LogLevel.Debug, categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
+    public void Info(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
+        [CallerLineNumber] int line = 0)
+    {
+        if (!IsEnabled(LogLevel.Trace)) return;
+
+        var builder = new LogMessageBuilder<InfoLevel>();
+        builder.AppendLiteral(message);
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -86,6 +110,18 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
+    public void Warn(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
+        [CallerLineNumber] int line = 0)
+    {
+        if (!IsEnabled(LogLevel.Trace)) return;
+
+        var builder = new LogMessageBuilder<WarnLevel>();
+        builder.AppendLiteral(message);
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
     public void Warn([InterpolatedStringHandlerArgument("")] ref LogMessageBuilder<WarnLevel> builder,
         [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
     {
@@ -93,6 +129,18 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
 
         builder.FinishWrite();
         var logEvent = new LogEvent(LogLevel.Warning, categoryName, file, member, line);
+        _processor.Enqueue(ref logEvent, ref builder.Message);
+    }
+
+    public void Error(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
+        [CallerLineNumber] int line = 0)
+    {
+        if (!IsEnabled(LogLevel.Trace)) return;
+
+        var builder = new LogMessageBuilder<ErrorLevel>();
+        builder.AppendLiteral(message);
+        builder.FinishWrite();
+        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
