@@ -69,12 +69,12 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
     public void Debug(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
         [CallerLineNumber] int line = 0)
     {
-        if (!IsEnabled(LogLevel.Trace)) return;
+        if (!IsEnabled(LogLevel.Debug)) return;
 
         var builder = new LogMessageBuilder<DebugLevel>();
         builder.AppendLiteral(message);
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Debug, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -91,12 +91,12 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
     public void Info(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
         [CallerLineNumber] int line = 0)
     {
-        if (!IsEnabled(LogLevel.Trace)) return;
+        if (!IsEnabled(LogLevel.Information)) return;
 
         var builder = new LogMessageBuilder<InfoLevel>();
         builder.AppendLiteral(message);
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Information, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -113,12 +113,12 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
     public void Warn(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
         [CallerLineNumber] int line = 0)
     {
-        if (!IsEnabled(LogLevel.Trace)) return;
+        if (!IsEnabled(LogLevel.Warning)) return;
 
         var builder = new LogMessageBuilder<WarnLevel>();
         builder.AppendLiteral(message);
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Warning, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
@@ -135,12 +135,12 @@ public sealed class NanoLogger(string categoryName = "", LogLevel minimumLevel =
     public void Error(string message, [CallerFilePath] string file = "", [CallerMemberName] string member = "",
         [CallerLineNumber] int line = 0)
     {
-        if (!IsEnabled(LogLevel.Trace)) return;
+        if (!IsEnabled(LogLevel.Error)) return;
 
         var builder = new LogMessageBuilder<ErrorLevel>();
         builder.AppendLiteral(message);
         builder.FinishWrite();
-        var logEvent = new LogEvent(LogLevel.Trace, categoryName, file, member, line);
+        var logEvent = new LogEvent(LogLevel.Error, categoryName, file, member, line);
         _processor.Enqueue(ref logEvent, ref builder.Message);
     }
 
