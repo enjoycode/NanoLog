@@ -34,6 +34,12 @@ public sealed class LogMessageDump : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitULong(ReadOnlySpan<char> name, ReadOnlySpan<char> format, ulong value)
+    {
+        Console.WriteLine($"ULong: Name=\"{name}\" Format=\"{format}\" Value={value}");
+        return false;
+    }
+
     protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
     {
         Console.WriteLine($"Double: Name=\"{name}\" Format=\"{format}\" Value={value}");

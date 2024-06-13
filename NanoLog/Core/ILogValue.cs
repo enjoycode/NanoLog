@@ -2,5 +2,7 @@ namespace NanoLog;
 
 public interface ILogValue
 {
-    void AppendMembers(ref LogMessageWriter writer);
+    bool IsScalar { get; }
+
+    void AppendMembers(ref LogMessageWriter writer, string name);
 }

@@ -7,9 +7,7 @@ namespace NanoLog;
 
 public unsafe ref struct LogMessageWriter
 {
-    public LogMessageWriter()
-    {
-    }
+    public LogMessageWriter() { }
 
     private int _pos;
     private LogMessage _msg;
@@ -201,6 +199,21 @@ public unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
+    public void AppendULong(string name, ulong? v, string? format = null)
+    {
+        if (v.HasValue)
+        {
+            WriteByte((byte)TokenType.ULong);
+            WriteShortString(name);
+            WriteShortString(format);
+            var value = v.Value;
+            Write(new ReadOnlySpan<byte>((byte*)&value, 8));
+            return;
+        }
+
+        AppendNull(name);
+    }
+
     public void AppendDouble(string name, double? v, string? format = null)
     {
         if (v.HasValue)
@@ -279,18 +292,30 @@ public unsafe ref struct LogMessageWriter
 
     public void AppendLogValue<T>(string name, in T v) where T : ILogValue
     {
-        WriteByte((byte)TokenType.LogValue);
-        WriteShortString(name);
-        v.AppendMembers(ref this);
-        WriteByte((byte)TokenType.LogValueEndMembers);
+        if (!v.IsScalar)
+        {
+            WriteByte((byte)TokenType.LogValue);
+            WriteShortString(name);
+            v.AppendMembers(ref this, name);
+            WriteByte((byte)TokenType.LogValueEndMembers);
+            return;
+        }
+
+        v.AppendMembers(ref this, name);
     }
 
     public void AppendStructLogValue<T>(string name, ref T v) where T : struct, ILogValue
     {
-        WriteByte((byte)TokenType.LogValue);
-        WriteShortString(name);
-        v.AppendMembers(ref this);
-        WriteByte((byte)TokenType.LogValueEndMembers);
+        if (!v.IsScalar)
+        {
+            WriteByte((byte)TokenType.LogValue);
+            WriteShortString(name);
+            v.AppendMembers(ref this, name);
+            WriteByte((byte)TokenType.LogValueEndMembers);
+            return;
+        }
+
+        v.AppendMembers(ref this, name);
     }
 
     internal void FinishWrite()

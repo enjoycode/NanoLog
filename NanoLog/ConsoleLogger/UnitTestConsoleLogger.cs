@@ -84,6 +84,14 @@ internal sealed class UnitTestMessageVisitor : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitULong(ReadOnlySpan<char> name, ReadOnlySpan<char> format, ulong value)
+    {
+        TryWriteMemberName(name);
+
+        Console.Out.Write(value);
+        return false;
+    }
+
     protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
     {
         TryWriteMemberName(name);

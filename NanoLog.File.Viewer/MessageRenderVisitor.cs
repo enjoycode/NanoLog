@@ -78,6 +78,14 @@ internal sealed class MessageRenderVisitor : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitULong(ReadOnlySpan<char> name, ReadOnlySpan<char> format, ulong value)
+    {
+        BeforeToken(name);
+        Driver.AddStr(value.ToString());
+        AfterToken();
+        return false;
+    }
+
     protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
     {
         BeforeToken(name);

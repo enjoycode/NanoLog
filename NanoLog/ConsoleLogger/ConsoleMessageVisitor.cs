@@ -66,6 +66,16 @@ public sealed class ConsoleMessageVisitor(ConsoleFormatter formatter) : LogMessa
         return false;
     }
 
+    protected override bool VisitULong(ReadOnlySpan<char> name, ReadOnlySpan<char> format, ulong value)
+    {
+        TryWriteMemberName(name);
+
+        formatter.BeforeToken(TokenType.ULong);
+        formatter.WriteFormattable(value, format);
+        formatter.AfterToken(TokenType.ULong);
+        return false;
+    }
+
     protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
     {
         TryWriteMemberName(name);

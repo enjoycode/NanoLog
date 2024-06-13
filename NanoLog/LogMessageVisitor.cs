@@ -99,6 +99,14 @@ public abstract unsafe class LogMessageVisitor
         ReadTo(new Span<byte>(&res, 8));
         return res;
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ulong ReadULong()
+    {
+        var res = 0UL;
+        ReadTo(new Span<byte>(&res, 8));
+        return res;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private double ReadDouble()
@@ -181,6 +189,11 @@ public abstract unsafe class LogMessageVisitor
                         return;
                     _firstMember = false;
                     break;
+                case TokenType.ULong:
+                    if (VisitULong(ReadShortString(), ReadShortString(), ReadULong()))
+                        return;
+                    _firstMember = false;
+                    break;
                 case TokenType.Double:
                     if (VisitDouble(ReadShortString(), ReadShortString(), ReadDouble()))
                         return;
@@ -240,6 +253,8 @@ public abstract unsafe class LogMessageVisitor
     protected abstract bool VisitChar(ReadOnlySpan<char> name, char value);
 
     protected abstract bool VisitInt(ReadOnlySpan<char> name, ReadOnlySpan<char> format, int value);
+
+    protected abstract bool VisitULong(ReadOnlySpan<char> name, ReadOnlySpan<char> format, ulong value);
 
     protected abstract bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value);
 

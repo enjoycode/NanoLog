@@ -48,6 +48,12 @@ public sealed class LogTokenVisitor : LogMessageVisitor
         return false;
     }
 
+    protected override bool VisitULong(ReadOnlySpan<char> name, ReadOnlySpan<char> format, ulong value)
+    {
+        _current.TryAddChild(name.ToString(), new LogTokenNode(_current, TokenType.ULong, value));
+        return false;
+    }
+
     protected override bool VisitDouble(ReadOnlySpan<char> name, ReadOnlySpan<char> format, double value)
     {
         _current.TryAddChild(name.ToString(), new LogTokenNode(_current, TokenType.Double, value));
