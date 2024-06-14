@@ -6,15 +6,14 @@ namespace NanoLog;
 public sealed class UnitTestConsoleLogger : ILogger
 {
     private readonly UnitTestMessageVisitor _visitor = new();
-    private readonly char[] _dateTimeBuffer = new char[32];
 
     public void Log(ref readonly LogEvent logEvent, ref readonly LogMessage message)
     {
-        logEvent.Time.TryFormat(_dateTimeBuffer.AsSpan(), out var charsWritten, "MMdd hh:mm:ss.fff");
+        logEvent.Time.TryFormat(_visitor.FormatBuffer.AsSpan(), out var charsWritten, "MMdd hh:mm:ss.fff");
 
         Console.Out.Write('[');
         Console.Out.Write(DefaultConsoleFormatter.GetLevelChar(logEvent.Level));
-        Console.Out.Write(_dateTimeBuffer.AsSpan(0, charsWritten));
+        Console.Out.Write(_visitor.FormatBuffer.AsSpan(0, charsWritten));
         Console.Out.Write(' ');
         Console.Out.Write(Path.GetFileName(logEvent.File));
         Console.Out.Write(' ');
@@ -32,6 +31,8 @@ public sealed class UnitTestConsoleLogger : ILogger
 
 internal sealed class UnitTestMessageVisitor : LogMessageVisitor
 {
+    internal readonly char[] FormatBuffer = new char[64];
+
     private void TryWriteMemberName(ReadOnlySpan<char> name)
     {
         if (IsLogValueMember)
@@ -80,7 +81,10 @@ internal sealed class UnitTestMessageVisitor : LogMessageVisitor
     {
         TryWriteMemberName(name);
 
-        Console.Out.Write(value);
+        if (value.TryFormat(FormatBuffer, out var charsWritten, format))
+            Console.Out.Write(FormatBuffer.AsSpan(0, charsWritten));
+        else
+            Console.Out.Write(value);
         return false;
     }
 
@@ -88,7 +92,11 @@ internal sealed class UnitTestMessageVisitor : LogMessageVisitor
     {
         TryWriteMemberName(name);
 
-        Console.Out.Write(value);
+        if (value.TryFormat(FormatBuffer, out var charsWritten, format))
+            Console.Out.Write(FormatBuffer.AsSpan(0, charsWritten));
+        else
+            Console.Out.Write(value);
+
         return false;
     }
 
@@ -96,7 +104,10 @@ internal sealed class UnitTestMessageVisitor : LogMessageVisitor
     {
         TryWriteMemberName(name);
 
-        Console.Out.Write(value);
+        if (value.TryFormat(FormatBuffer, out var charsWritten, format))
+            Console.Out.Write(FormatBuffer.AsSpan(0, charsWritten));
+        else
+            Console.Out.Write(value);
         return false;
     }
 
@@ -104,7 +115,10 @@ internal sealed class UnitTestMessageVisitor : LogMessageVisitor
     {
         TryWriteMemberName(name);
 
-        Console.Out.Write(value);
+        if (value.TryFormat(FormatBuffer, out var charsWritten, format))
+            Console.Out.Write(FormatBuffer.AsSpan(0, charsWritten));
+        else
+            Console.Out.Write(value);
         return false;
     }
 
