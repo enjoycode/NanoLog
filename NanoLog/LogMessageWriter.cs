@@ -244,13 +244,12 @@ public unsafe ref struct LogMessageWriter
         AppendNull(name);
     }
 
-    public void AppendGuid(string name, Guid? v, string? format = null)
+    public void AppendGuid(string name, Guid? v)
     {
         if (v.HasValue)
         {
             WriteByte((byte)TokenType.Guid);
             WriteShortString(name);
-            WriteShortString(format);
             var bytes = stackalloc byte[16];
             v.Value.TryWriteBytes(new Span<byte>(bytes, 16));
             Write(new ReadOnlySpan<byte>(bytes, 16));
