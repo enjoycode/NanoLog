@@ -74,6 +74,12 @@ public ref struct LogMessageBuilder<T> where T : ILogLevelHandler
 
     public void AppendFormatted(string? value, [CallerArgumentExpression("value")] string name = "")
     {
+        if (value == Environment.NewLine)
+        {
+            AppendLiteral(value);
+            return;
+        }
+        
         _writer.AppendString(name, value);
     }
 
